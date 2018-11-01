@@ -118,6 +118,37 @@ for step=1:350
                 
                 if sum(sum(phi(i0-p_r:i0+p_r,j0-p_r:j0+p_r)))~=0
                     
+                    divVB1=0;
+                    divVB2=0;
+                    divVB3=0;
+                    for ii=1:s_s
+                        for jj=1:s_s
+                            lii=s_s-ii+1; hi=i-(s_r+1)+ii;
+                            ljj=s_s-jj+1; hj=j-(s_r+1)+jj;
+                        
+                            if(hi<1)
+                                hi = 1;
+                            end
+                            if(hi>m)
+                                hi = m;
+                            end
+                            if(hj<1)
+                                hj = 1;
+                            end
+                            if(hj>n)
+                                hj = n;
+                            end
+                        
+                            divVB1 = divVB1 + sqrt(w1(ii,jj,i,j))*(v1(ii,jj,i,j)-v1(lii,ljj,hi,hj));
+                            divVB1 = divVB1 - sqrt(w1(ii,jj,i,j))*(b1(ii,jj,i,j)-b1(lii,ljj,hi,hj));
+                            divVB2 = divVB2 + sqrt(w2(ii,jj,i,j))*(v2(ii,jj,i,j)-v2(lii,ljj,hi,hj));
+                            divVB2 = divVB2 - sqrt(w2(ii,jj,i,j))*(b2(ii,jj,i,j)-b2(lii,ljj,hi,hj));
+                            divVB3 = divVB3 + sqrt(w3(ii,jj,i,j))*(v3(ii,jj,i,j)-v3(lii,ljj,hi,hj));
+                            divVB3 = divVB3 - sqrt(w3(ii,jj,i,j))*(b3(ii,jj,i,j)-b3(lii,ljj,hi,hj));
+                           
+                        end
+                    end
+                    
                     sum_uw1=sum(sum(u1(i0-s_r:i0+s_r,j0-s_r:j0+s_r).*w1(:,:,i,j)));
                     sum_uw2=sum(sum(u2(i0-s_r:i0+s_r,j0-s_r:j0+s_r).*w2(:,:,i,j)));
                     sum_uw3=sum(sum(u3(i0-s_r:i0+s_r,j0-s_r:j0+s_r).*w3(:,:,i,j)));
@@ -126,9 +157,9 @@ for step=1:350
                     sum_w2=sum(sum(w2(:,:,i,j)));
                     sum_w3=sum(sum(w3(:,:,i,j)));
                     
-                    u01(i,j)=(lamda*PHI(i0,j0)*f01(i,j)+sum_uw1)/(lamda*PHI(i0,j0)+sum_w1);
-                    u02(i,j)=(lamda*PHI(i0,j0)*f02(i,j)+sum_uw2)/(lamda*PHI(i0,j0)+sum_w2);
-                    u03(i,j)=(lamda*PHI(i0,j0)*f03(i,j)+sum_uw3)/(lamda*PHI(i0,j0)+sum_w3);
+                    u01(i,j)=(lamda*PHI(i0,j0)*f01(i,j)+sum_uw1-0.5*divVB1)/(lamda*PHI(i0,j0)+sum_w1);
+                    u02(i,j)=(lamda*PHI(i0,j0)*f02(i,j)+sum_uw2-0.5*divVB2)/(lamda*PHI(i0,j0)+sum_w2);
+                    u03(i,j)=(lamda*PHI(i0,j0)*f03(i,j)+sum_uw3-0.5*divVB3)/(lamda*PHI(i0,j0)+sum_w3);
                     
                 else
                     
