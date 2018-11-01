@@ -77,7 +77,29 @@ for step=1:350
     
     for i=1:m
         for j=1:n
+            
+            i0=i+t_r;
+            j0=j+t_r;
+            
+            nlgu1=zeros(s_s,s_s);
+            nlgu2=zeros(s_s,s_s);
+            nlgu3=zeros(s_s,s_s);
+            for ii=1:s_s
+                for jj=1:s_s
+                    
+                    nlgu1(ii,jj)=(u1(i0-(s_r+1)+ii,j0-(s_r+1)+jj)-u01(i,j))*sqrt(w1(ii,jj,i,j));
+                    nlgu2(ii,jj)=(u2(i0-(s_r+1)+ii,j0-(s_r+1)+jj)-u02(i,j))*sqrt(w2(ii,jj,i,j));
+                    nlgu3(ii,jj)=(u3(i0-(s_r+1)+ii,j0-(s_r+1)+jj)-u03(i,j))*sqrt(w3(ii,jj,i,j));
+                    
+                end %end for jj
+            end %end for iigit 
                 
+        end
+    end
+    
+    for i=1:m
+        for j=1:n
+            
                 i0=i+t_r;
                 j0=j+t_r;
                 
