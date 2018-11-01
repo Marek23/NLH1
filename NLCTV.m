@@ -174,6 +174,20 @@ for step=1:350
         end %end for i
     end %end for uiter
     
+    beta1=0;
+    beta2=0;
+    beta3=0;
+    for i=1:m
+        for j=1:n
+            
+            beta1=beta1+sqrt(sumsqr(v1(:,:,i,j)));
+            beta2=beta2+sqrt(sumsqr(v2(:,:,i,j)));
+            beta3=beta3+sqrt(sumsqr(v3(:,:,i,j)));
+            
+        end %end for j
+    end %end for i
+    
+    mbeta=sqrt(beta1^2+beta2^2+beta3^2)+eps;
     
     if mod(step,10)==0
         
