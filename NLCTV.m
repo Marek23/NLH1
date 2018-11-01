@@ -119,15 +119,15 @@ for step=1:350
                 if sum(sum(phi(i0-p_r:i0+p_r,j0-p_r:j0+p_r)))~=0
                     
                     sum_uw1=sum(sum(u1(i0-s_r:i0+s_r,j0-s_r:j0+s_r).*w1(:,:,i,j)));
-                    sum_w1=sum(sum(w1(:,:,i,j)));
-                    u01(i,j)=(lamda*PHI(i0,j0)*f01(i,j)+sum_uw1)/(lamda*PHI(i0,j0)+sum_w1);
-                    
                     sum_uw2=sum(sum(u2(i0-s_r:i0+s_r,j0-s_r:j0+s_r).*w2(:,:,i,j)));
-                    sum_w2=sum(sum(w2(:,:,i,j)));
-                    u02(i,j)=(lamda*PHI(i0,j0)*f02(i,j)+sum_uw2)/(lamda*PHI(i0,j0)+sum_w2);
-                    
                     sum_uw3=sum(sum(u3(i0-s_r:i0+s_r,j0-s_r:j0+s_r).*w3(:,:,i,j)));
+                    
+                    sum_w1=sum(sum(w1(:,:,i,j)));
+                    sum_w2=sum(sum(w2(:,:,i,j)));
                     sum_w3=sum(sum(w3(:,:,i,j)));
+                    
+                    u01(i,j)=(lamda*PHI(i0,j0)*f01(i,j)+sum_uw1)/(lamda*PHI(i0,j0)+sum_w1);
+                    u02(i,j)=(lamda*PHI(i0,j0)*f02(i,j)+sum_uw2)/(lamda*PHI(i0,j0)+sum_w2);
                     u03(i,j)=(lamda*PHI(i0,j0)*f03(i,j)+sum_uw3)/(lamda*PHI(i0,j0)+sum_w3);
                     
                 else
