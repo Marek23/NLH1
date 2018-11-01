@@ -109,8 +109,9 @@ for step=1:350
         end
     end
     
-    for i=1:m
-        for j=1:n
+    for uiter=1:2
+        for i=1:m
+            for j=1:n
             
                 i0=i+t_r;
                 j0=j+t_r;
@@ -138,8 +139,9 @@ for step=1:350
                 end
                 
                 
-        end
-    end
+            end %end for j
+        end %end for i
+    end %end for uiter
     
     
     if mod(step,10)==0
