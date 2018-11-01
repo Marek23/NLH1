@@ -92,24 +92,24 @@ for step=1:350
             
             i0=i+t_r;
             j0=j+t_r;
-            
-            nlgu1=zeros(s_s,s_s);
-            nlgu2=zeros(s_s,s_s);
-            nlgu3=zeros(s_s,s_s);
-            for ii=1:s_s
-                for jj=1:s_s
+            if sum(sum(phi(i0-p_r:i0+p_r,j0-p_r:j0+p_r)))~=0
+                nlgu1=zeros(s_s,s_s);
+                nlgu2=zeros(s_s,s_s);
+                nlgu3=zeros(s_s,s_s);
+                for ii=1:s_s
+                    for jj=1:s_s
                     
-                    nlgu1(ii,jj)=(u1(i0-(s_r+1)+ii,j0-(s_r+1)+jj)-u01(i,j))*sqrt(w1(ii,jj,i,j));
-                    nlgu2(ii,jj)=(u2(i0-(s_r+1)+ii,j0-(s_r+1)+jj)-u02(i,j))*sqrt(w2(ii,jj,i,j));
-                    nlgu3(ii,jj)=(u3(i0-(s_r+1)+ii,j0-(s_r+1)+jj)-u03(i,j))*sqrt(w3(ii,jj,i,j));
+                        nlgu1(ii,jj)=(u1(i0-(s_r+1)+ii,j0-(s_r+1)+jj)-u01(i,j))*sqrt(w1(ii,jj,i,j));
+                        nlgu2(ii,jj)=(u2(i0-(s_r+1)+ii,j0-(s_r+1)+jj)-u02(i,j))*sqrt(w2(ii,jj,i,j));
+                        nlgu3(ii,jj)=(u3(i0-(s_r+1)+ii,j0-(s_r+1)+jj)-u03(i,j))*sqrt(w3(ii,jj,i,j));
                     
-                end %end for jj
-            end %end for ii
-                
-            b1(:,:,i,j)=b1(:,:,i,j)+sqrt(w1(:,:,i,j)).*nlgu1-v1(:,:,i,j);
-            b2(:,:,i,j)=b2(:,:,i,j)+sqrt(w2(:,:,i,j)).*nlgu2-v2(:,:,i,j);
-            b3(:,:,i,j)=b3(:,:,i,j)+sqrt(w3(:,:,i,j)).*nlgu3-v3(:,:,i,j);
+                    end %end for jj
+                end %end for ii
             
+                b1(:,:,i,j)=b1(:,:,i,j)+sqrt(w1(:,:,i,j)).*nlgu1-v1(:,:,i,j);
+                b2(:,:,i,j)=b2(:,:,i,j)+sqrt(w2(:,:,i,j)).*nlgu2-v2(:,:,i,j);
+                b3(:,:,i,j)=b3(:,:,i,j)+sqrt(w3(:,:,i,j)).*nlgu3-v3(:,:,i,j);
+            end
         end
     end
     
@@ -120,7 +120,7 @@ for step=1:350
                 i0=i+t_r;
                 j0=j+t_r;
                 
-                if sum(sum(phi(i0-p_r:i0+p_r,j0-p_r:j0+p_r)))~=0
+                if sum(sum(phi(i0-p_r:i0+p_r,j0-p_r:j0+p_r)))~=0 && PHI(i0,j0)<1
                     
                     divVB1=0;
                     divVB2=0;
@@ -183,11 +183,13 @@ for step=1:350
     beta3=0;
     for i=1:m
         for j=1:n
-            
-            beta1=beta1+sqrt(sumsqr(v1(:,:,i,j)));
-            beta2=beta2+sqrt(sumsqr(v2(:,:,i,j)));
-            beta3=beta3+sqrt(sumsqr(v3(:,:,i,j)));
-            
+            i0=i+t_r;
+            j0=j+t_r;
+            if sum(sum(phi(i0-p_r:i0+p_r,j0-p_r:j0+p_r)))~=0
+                beta1=beta1+sqrt(sumsqr(v1(:,:,i,j)));
+                beta2=beta2+sqrt(sumsqr(v2(:,:,i,j)));
+                beta3=beta3+sqrt(sumsqr(v3(:,:,i,j)));
+            end
         end %end for j
     end %end for i
     
@@ -198,43 +200,45 @@ for step=1:350
             
             i0=i+t_r;
             j0=j+t_r;
-            
-            for ii=1:s_s
-                for jj=1:s_s
+            if sum(sum(phi(i0-p_r:i0+p_r,j0-p_r:j0+p_r)))~=0
+                for ii=1:s_s
+                    for jj=1:s_s
                     
-                    a1(ii,jj,i,j)=(u1(i0-(s_r+1)+ii,j0-(s_r+1)+jj)...
-                        -u01(i,j))*sqrt(w1(ii,jj,i,j))+b1(ii,jj,i,j);
-                    a2(ii,jj,i,j)=(u2(i0-(s_r+1)+ii,j0-(s_r+1)+jj)...
-                        -u02(i,j))*sqrt(w2(ii,jj,i,j))+b2(ii,jj,i,j);
-                    a3(ii,jj,i,j)=(u3(i0-(s_r+1)+ii,j0-(s_r+1)+jj)...
-                        -u03(i,j))*sqrt(w3(ii,jj,i,j))+b3(ii,jj,i,j);
+                        a1(ii,jj,i,j)=(u1(i0-(s_r+1)+ii,j0-(s_r+1)+jj)...
+                            -u01(i,j))*sqrt(w1(ii,jj,i,j))+b1(ii,jj,i,j);
+                        a2(ii,jj,i,j)=(u2(i0-(s_r+1)+ii,j0-(s_r+1)+jj)...
+                            -u02(i,j))*sqrt(w2(ii,jj,i,j))+b2(ii,jj,i,j);
+                        a3(ii,jj,i,j)=(u3(i0-(s_r+1)+ii,j0-(s_r+1)+jj)...
+                            -u03(i,j))*sqrt(w3(ii,jj,i,j))+b3(ii,jj,i,j);
                     
-                end %end for jj
-            end %end for ii
-            
+                    end %end for jj
+                end %end for ii
+            end
         end %end for j
     end %end for i
     
     for i=1:m
         for j=1:n
-            
-            for ii=1:s_s
-                for jj=1:s_s
+            i0=i+t_r;
+            j0=j+t_r;
+            if sum(sum(phi(i0-p_r:i0+p_r,j0-p_r:j0+p_r)))~=0
+                for ii=1:s_s
+                    for jj=1:s_s
                     
-                    moda1=sqrt(sumsqr(a1(:,:,i,j)))+eps;
-                    moda2=sqrt(sumsqr(a2(:,:,i,j)))+eps;
-                    moda3=sqrt(sumsqr(a3(:,:,i,j)))+eps;
+                        moda1=sqrt(sumsqr(a1(:,:,i,j)))+eps;
+                        moda2=sqrt(sumsqr(a2(:,:,i,j)))+eps;
+                        moda3=sqrt(sumsqr(a3(:,:,i,j)))+eps;
                     
-                    v1(ii,jj,i,j)=max(moda1-...
-                        (beta1/mbeta),0)*a1(ii,jj,i,j)/moda1;
-                    v2(ii,jj,i,j)=max(moda2-...
-                        (beta2/mbeta),0)*a2(ii,jj,i,j)/moda2;
-                    v3(ii,jj,i,j)=max(moda3-...
-                        (beta3/mbeta),0)*a3(ii,jj,i,j)/moda3;
+                        v1(ii,jj,i,j)=max(moda1-...
+                            (beta1/mbeta),0)*a1(ii,jj,i,j)/moda1;
+                        v2(ii,jj,i,j)=max(moda2-...
+                            (beta2/mbeta),0)*a2(ii,jj,i,j)/moda2;
+                        v3(ii,jj,i,j)=max(moda3-...
+                            (beta3/mbeta),0)*a3(ii,jj,i,j)/moda3;
                     
-                end %end for jj
-            end %end for ii
-            
+                    end %end for jj
+                end %end for ii
+            end
         end %end for j
     end %end for i
     
