@@ -50,6 +50,14 @@ w1=zeros(s_s,s_s,m,n);
 w2=zeros(s_s,s_s,m,n);
 w3=zeros(s_s,s_s,m,n);
 
+v1=zeros(s_s,s_s,m,n);
+v2=zeros(s_s,s_s,m,n);
+v3=zeros(s_s,s_s,m,n);
+
+b1=zeros(s_s,s_s,m,n);
+b2=zeros(s_s,s_s,m,n);
+b3=zeros(s_s,s_s,m,n);
+
 tic
 for step=1:350
     step
@@ -92,8 +100,12 @@ for step=1:350
                     nlgu3(ii,jj)=(u3(i0-(s_r+1)+ii,j0-(s_r+1)+jj)-u03(i,j))*sqrt(w3(ii,jj,i,j));
                     
                 end %end for jj
-            end %end for iigit 
+            end %end for ii
                 
+            b1(:,:,i,j)=b1(:,:,i,j)+sqrt(w1(:,:,i,j)).*nlgu1-v1(:,:,i,j);
+            b2(:,:,i,j)=b2(:,:,i,j)+sqrt(w2(:,:,i,j)).*nlgu2-v2(:,:,i,j);
+            b3(:,:,i,j)=b3(:,:,i,j)+sqrt(w3(:,:,i,j)).*nlgu3-v3(:,:,i,j);
+            
         end
     end
     
@@ -102,7 +114,6 @@ for step=1:350
             
                 i0=i+t_r;
                 j0=j+t_r;
-                
                 
                 if sum(sum(phi(i0-p_r:i0+p_r,j0-p_r:j0+p_r)))~=0
                     
