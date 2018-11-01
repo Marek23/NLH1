@@ -215,6 +215,29 @@ for step=1:350
         end %end for j
     end %end for i
     
+    for i=1:m
+        for j=1:n
+            
+            for ii=1:s_s
+                for jj=1:s_s
+                    
+                    moda1=sqrt(sumsqr(a1(:,:,i,j)))+eps;
+                    moda2=sqrt(sumsqr(a2(:,:,i,j)))+eps;
+                    moda3=sqrt(sumsqr(a3(:,:,i,j)))+eps;
+                    
+                    v1(ii,jj,i,j)=max(moda1-...
+                        (beta1/mbeta),0)*a1(ii,jj,i,j)/moda1;
+                    v2(ii,jj,i,j)=max(moda2-...
+                        (beta2/mbeta),0)*a2(ii,jj,i,j)/moda2;
+                    v3(ii,jj,i,j)=max(moda3-...
+                        (beta3/mbeta),0)*a3(ii,jj,i,j)/moda3;
+                    
+                end %end for jj
+            end %end for ii
+            
+        end %end for j
+    end %end for i
+    
     if mod(step,10)==0
         
 %         imwrite(uint8(u0),[ '..\ren1\q' num2str(step) '.bmp']);
