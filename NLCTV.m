@@ -18,11 +18,7 @@ f0=imread('Obr4m4.bmp');
 figure; imagesc(f0); colormap(gray); axis off; axis equal;
 f0=double(f0);
 
-f01 = f0(:,:,1);
-f02 = f0(:,:,2);
-f03 = f0(:,:,3);
-
-[m,n]=size(f01);
+[m,n,ny]=size(f0);
   
 p_r=2;
 s_r=5;
@@ -33,22 +29,111 @@ t_r=p_r+s_r;
 BrokenAreaColor=255;
 lamda=.01;sigma=5;h=2;
 
-kernel=fspecial('gaussian',p_s,sigma); %¸ßË¹ºËº¯Êý
+kernel=fspecial('gaussian',p_s,sigma);
 
-phi=double(1-((f0(:,:,1)==BrokenAreaColor) & ...
+maska = double((f0(:,:,1)==BrokenAreaColor) & ...
             (f0(:,:,2)==BrokenAreaColor) & ...
-            (f0(:,:,3)==BrokenAreaColor)));
+            (f0(:,:,3)==BrokenAreaColor));
 
+R = f0(:,:,1);
+%% pobieram od u¿ytkownika salient structures
+Ps = getPencils();
+for i=1:length(Ps)
+    SPLinked(:,:,i) = zeros(m,n);
+    P = Ps{i};
+    for p=1:length(P)
+        SPLinked(int32(P(p,2)),int32(P(p,1)),i)=1;
+    end
+    se = strel('disk',10);
+    SPLinked(:,:,i) = imclose(SPLinked(:,:,i),se);
+    SPLinked(:,:,i) = imclose(SPLinked(:,:,i),se);
+    SPLinked(:,:,i) = imclose(SPLinked(:,:,i),se);
+    
+    figure
+    imshow(SPLinked(:,:,i));
+end
+
+%% Poczatek algorytm Criminisi
+minC=0.05;
+[m,n,nz] = size(f0);
+mask_fill = double(~single(maska)); %% zmieniam maskê, algorytm tam gdzie ma 0 widzi maskê
+%% maska musi byæ o dwa piksele szersza ni¿ maska na zniszczonym obrazie, potrzebne do ró¿niczek
+mask = imerode(imerode(mask_fill,ones(3,3)),ones(3,3));
+%% inicjalizacja Confidence Term
+C = initializeC(mask, minC);
+%% parametr rozmmiaru patch'a
+patch_size = 8; %jako promien
+%% patch nie mo¿e wychodziæ poza granice obrazu
+ograniczenie = ones(m,n);ograniczenie(1:patch_size,:) = 0;ograniczenie(m-patch_size:m ,:) = 0;
+ograniczenie(:,1:patch_size) = 0;ograniczenie(:,n-patch_size:n) = 0;
+%% wzorzec mówi sk¹d mogê czerpaæ dane
+wzorzec = mask_fill;
+for i = 1: 1+patch_size
+    wzorzec = imerode(wzorzec,ones(3,3)); %%maska poszerzona, ¿eby nie trafiaæ szukaj¹c wzorca w pole objête mask¹
+end
+maska = wzorzec;
+for k=1:40
+    wzorzec = imerode(wzorzec,ones(3,3));
+end
+wzorzec = (maska - wzorzec).*ograniczenie;
+figure
+imshow(wzorzec);
+title('Punkty do czerpania Fi_q')
+
+%% ograniczenie wyznaczam do drugiej czêœci algorytmu po SalientStructure. 
+% Nie chcê korzystaæ w drugiej czêœci z wzorców g³ównych struktur
+wzorzec_bez_Salient_Structure = zeros(m,n);
+%% wype³nianie Salient Structures
+for k = 1: length(Ps)
+    %% poszerzam Salient Structures do czerpania ograniczonego wzorca
+    wzorzec_linii = SPLinked(:,:,k).*wzorzec;
+    for dil=1:5
+        wzorzec_linii = imdilate(wzorzec_linii,ones(3,3));
+    end
+    wzorzec_linii = wzorzec.*wzorzec_linii;
+    wzorzec_bez_Salient_Structure = wzorzec_bez_Salient_Structure + wzorzec_linii;
+    %% wype³niam Salient Structure
+    maska = SPLinked(:,:,k).*~mask_fill;%maska = zeros(nx,ny);
+    while(any(maska(:)))
+        [px,py] = find(maska > 0);
+        px = px(1);
+        py = py(1);
+        [fixx, fixy] = ustawWspolrzednePatcha(px,py,patch_size,m,n);
+        FI_p.I = f0(px+fixx-patch_size:px+fixx+patch_size,py+fixy-patch_size:py+fixy+patch_size,:);
+        FI_p.m = mask_fill(px+fixx-patch_size:px+fixx+patch_size,py+fixy-patch_size:py+fixy+patch_size);
+        [qx, qy] = SSD3(f0,FI_p,wzorzec_linii,patch_size);
+        FI_q = f0(qx-patch_size:qx+patch_size,qy-patch_size:qy+patch_size,:);
+        FR_q = R(qx-patch_size:qx+patch_size,qy-patch_size:qy+patch_size,:);
+        for x= 1:2*patch_size+1
+            for y= 1:2*patch_size+1
+                if(mask_fill(px+fixx-1+x-patch_size,py+fixy-1+y-patch_size) == 0)
+                    f0(px+fixx-1+x-patch_size,py+fixy-1+y-patch_size,:) = FI_q(x,y,:);
+                    R(px-1+x-patch_size,py-1+y-patch_size,:) = FR_q(x,y,:);
+                    mask_fill(px+fixx-1+x-patch_size,py+fixy-1+y-patch_size) = 1;
+                end
+                maska(px+fixx-1+x-patch_size,py+fixy-1+y-patch_size) = 0;
+            end
+        end
+        figure; imagesc(uint8(f0)); colormap(gray); axis off; axis equal;
+    end
+    maska = mask_fill;
+end
+
+phi=maska;
 phi=padarray(phi,[t_r t_r],'symmetric');
 PHI=phi;
 
-u01=f01;
-u02=f02;
-u03=f03;
+f01 = f0(:,:,1);
+f02 = f0(:,:,2);
+f03 = f0(:,:,3);
 
 w1=zeros(s_s,s_s,m,n);
 w2=zeros(s_s,s_s,m,n);
 w3=zeros(s_s,s_s,m,n);
+
+u01 = f0(:,:,1);
+u02 = f0(:,:,2);
+u03 = f0(:,:,3);
 
 tic
 for step=1:350
@@ -111,10 +196,12 @@ for step=1:350
     
     if mod(step,10)==0
         
-%         imwrite(uint8(u0),[ '..\ren1\q' num2str(step) '.bmp']);
         uwyn(:,:,1) = u01;
         uwyn(:,:,2) = u02;
         uwyn(:,:,3) = u03;
+        
+        imwrite(uint8(uwyn),[ 'testy\q' num2str(step) '.bmp']);
+
         
         figure; imagesc(uint8(uwyn)); colormap(gray); axis off; axis equal;
         pause(1)
