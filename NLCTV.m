@@ -4,11 +4,13 @@ clear
 close all
 
 %%
-%I = imread('C:\MAREK\MAGISTERKA\Obrazy\Obr6m3.png');
-%imwrite(I,'Obr6m3.bmp') ;
+% I = imread('C:\MAREK\MAGISTERKA\Obrazy\Obr17m.png');
+% imwrite(I,'C:\MAREK\MAGISTERKA\Obrazy\Obr17m.bmp') ;
 
 %% 
-f0=imread('Obr4m4.bmp');
+f0=imread('C:\MAREK\MAGISTERKA\Obrazy\Obr17m.bmp');
+%f0=imread('031.bmp');
+
 
 %%
 % f0=imnoise(f0,'salt & pepper',0.3);
@@ -27,13 +29,12 @@ s_s=s_r*2+1;
 t_r=p_r+s_r;
 
 BrokenAreaColor=255;
-lamda=.01;sigma=5;h=2;
+lamda=.01;sigma=1.7;h=2;
 
 kernel=fspecial('gaussian',p_s,sigma);
 
-maska = double((f0(:,:,1)==BrokenAreaColor) & ...
-            (f0(:,:,2)==BrokenAreaColor) & ...
-            (f0(:,:,3)==BrokenAreaColor));
+maska = zeros(m,n);
+maska(f0(:,:,2) == 255 & f0(:,:,1) == 0 & f0(:,:,3) == 0) = 1;
 
 R = f0(:,:,1);
 %% pobieram od u¿ytkownika salient structures
@@ -53,16 +54,10 @@ for i=1:length(Ps)
     imshow(SPLinked(:,:,i));
 end
 
-%% Poczatek algorytm Criminisi
-minC=0.05;
 [m,n,nz] = size(f0);
 mask_fill = double(~single(maska)); %% zmieniam maskê, algorytm tam gdzie ma 0 widzi maskê
-%% maska musi byæ o dwa piksele szersza ni¿ maska na zniszczonym obrazie, potrzebne do ró¿niczek
-mask = imerode(imerode(mask_fill,ones(3,3)),ones(3,3));
-%% inicjalizacja Confidence Term
-C = initializeC(mask, minC);
 %% parametr rozmmiaru patch'a
-patch_size = 8; %jako promien
+patch_size = 10; %jako promien
 %% patch nie mo¿e wychodziæ poza granice obrazu
 ograniczenie = ones(m,n);ograniczenie(1:patch_size,:) = 0;ograniczenie(m-patch_size:m ,:) = 0;
 ograniczenie(:,1:patch_size) = 0;ograniczenie(:,n-patch_size:n) = 0;
@@ -76,9 +71,6 @@ for k=1:40
     wzorzec = imerode(wzorzec,ones(3,3));
 end
 wzorzec = (maska - wzorzec).*ograniczenie;
-figure
-imshow(wzorzec);
-title('Punkty do czerpania Fi_q')
 
 %% ograniczenie wyznaczam do drugiej czêœci algorytmu po SalientStructure. 
 % Nie chcê korzystaæ w drugiej czêœci z wzorców g³ównych struktur
@@ -152,8 +144,8 @@ for step=1:350
     end
     
     if mod(step,10)==0
-        
-        phi=1-(u1==BrokenAreaColor);
+        %% 
+        phi=1-(u2==BrokenAreaColor);
         w1=updateWeight2(u01,u1,h,kernel,t_r,s_r,p_r,phi,PHI,w1);
         w2=updateWeight2(u02,u2,h,kernel,t_r,s_r,p_r,phi,PHI,w2);
         w3=updateWeight2(u03,u3,h,kernel,t_r,s_r,p_r,phi,PHI,w3);
@@ -200,7 +192,7 @@ for step=1:350
         uwyn(:,:,2) = u02;
         uwyn(:,:,3) = u03;
         
-        imwrite(uint8(uwyn),[ 'testy\q' num2str(step) '.bmp']);
+        imwrite(uint8(uwyn),[ 'NLCTV\Obr17mPar3' num2str(step) '.bmp']);
 
         
         figure; imagesc(uint8(uwyn)); colormap(gray); axis off; axis equal;
@@ -295,3 +287,4 @@ for i=1:size(u0,1)
         end
     end
 end
+
