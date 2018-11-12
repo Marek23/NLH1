@@ -1,14 +1,15 @@
 function NLCTV()
+
+images = dir('C:\MAREK\MAGISTERKA\Obrazy\msk\*.bmp');
+
+for i=1:length(images)
+
 clc
-clear
+clearvars -except images i
 close all
 
-%%
-%I = imread('C:\MAREK\MAGISTERKA\Obrazy\Obr6m3.png');
-%imwrite(I,'Obr6m3.bmp') ;
-
 %% 
-f0=imread('031.bmp');
+f0=imread(['C:\MAREK\MAGISTERKA\Obrazy\msk\' images(i).name]);
 
 %%
 % f0=imnoise(f0,'salt & pepper',0.3);
@@ -205,16 +206,17 @@ for step=1:350
     
     if mod(step,10)==0
         
-%         imwrite(uint8(u0),[ '..\ren1\q' num2str(step) '.bmp']);
-        figure; imagesc(uint8(u0)); colormap(gray); axis off; axis equal;
-        pause(1)
+        imwrite(uint8(u0),['C:\MAREK\MAGISTERKA\Obrazy\test\' 'step' num2str(step) images(i).name]);
+%         figure; imagesc(uint8(u0)); colormap(gray); axis off; axis equal;
+%         pause(1)
         
     end
     toc
     
 end
 
-figure; imagesc(uint8(u0)); colormap(gray); axis off; axis equal;
+%figure; imagesc(uint8(u0)); colormap(gray); axis off; axis equal;
+end
 
 function weight=updateWeight(u0,u,h,kernel,t_r,s_r,p_r,phi,w)
 
