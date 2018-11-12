@@ -2,14 +2,14 @@ function NLCTV()
 
 images = dir('C:\MAREK\MAGISTERKA\Obrazy\msk\*.bmp');
 
-for i=1:length(images)
+for image=1:length(images)
 
 clc
-clearvars -except images i
+clearvars -except images image
 close all
 
 %% 
-f0=imread(['C:\MAREK\MAGISTERKA\Obrazy\msk\' images(i).name]);
+f0=imread(['C:\MAREK\MAGISTERKA\Obrazy\msk\' images(image).name]);
 
 %%
 % f0=imnoise(f0,'salt & pepper',0.3);
@@ -21,8 +21,8 @@ f0=double(f0);
 
 [m,n,c]=size(f0);
   
-p_r=2;
-s_r=5;
+p_r=3;
+s_r=6;
 p_s=p_r*2+1;
 s_s=s_r*2+1;
 t_r=p_r+s_r;
@@ -50,7 +50,7 @@ b=zeros(s_s,s_s,m,n,c);
 a=zeros(s_s,s_s,m,n,c);
 
 tic
-for step=1:350
+for step=1:5000
     step
     
     u=padarray(u0,[t_r t_r],'symmetric');
@@ -206,9 +206,13 @@ for step=1:350
     
     if mod(step,10)==0
         
-        imwrite(uint8(u0),['C:\MAREK\MAGISTERKA\Obrazy\test\' 'step' num2str(step) images(i).name]);
+        imwrite(uint8(u0),['C:\MAREK\MAGISTERKA\Obrazy\test\' 'step' num2str(step) images(image).name]);
 %         figure; imagesc(uint8(u0)); colormap(gray); axis off; axis equal;
 %         pause(1)
+
+        if(sum(phi(:)) == size(phi,1)*size(phi,2))
+           break
+        end
         
     end
     toc
