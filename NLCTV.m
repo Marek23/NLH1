@@ -31,9 +31,9 @@ lamda=.01;sigma=5;h=2;
 
 kernel=fspecial('gaussian',p_s,sigma); %¸ßË¹ºËº¯Êý
 
-phi=double(1-((f0(:,:,1)==BrokenAreaColor) & ...
+phi=double(1-((f0(:,:,1)==0) & ...
             (f0(:,:,2)==BrokenAreaColor) & ...
-            (f0(:,:,3)==BrokenAreaColor)));
+            (f0(:,:,3)==0)));
 
 phi=padarray(phi,[t_r t_r],'symmetric');
 PHI=phi;
@@ -62,7 +62,9 @@ for step=1:350
     
     if mod(step,10)==0
         
-        phi=1-(u1==BrokenAreaColor);
+        phi=1-((u(:,:,1)==0) & ...
+            (u(:,:,2)==BrokenAreaColor) & ...
+            (u(:,:,3)==0));
         w=updateWeight2(u0,u,h,kernel,t_r,s_r,p_r,phi,PHI,w);
         
     end
