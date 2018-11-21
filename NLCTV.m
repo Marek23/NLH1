@@ -42,7 +42,7 @@ u0=f0;
 w=zeros(s_s,s_s,m,n);
 
 tic
-for step=1:350
+for step=1:50000
     step
     
     u=padarray(u0,[t_r t_r],'replicate');
@@ -94,6 +94,10 @@ for step=1:350
         
         figure; imagesc(uint8(u0)); colormap(gray); axis off; axis equal;
         pause(1)
+        
+        if(sum(phi(:)) == size(phi,1)*size(phi,2))
+           break
+        end
         
     end
     toc
