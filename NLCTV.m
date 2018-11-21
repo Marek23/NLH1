@@ -5,8 +5,15 @@ clc
 %I = imread('C:\MAREK\MAGISTERKA\Obrazy\Obr6m3.png');
 %imwrite(I,'Obr6m3.bmp') ;
 
+%%
+images = dir('C:\MAREK\MAGISTERKA\Obrazy\tmpm\*.bmp');
+
+for pict=1:length(images)
+
+clearvars -except images pict
+
 %% 
-f0=imread('test.bmp');
+f0=imread(['C:\MAREK\MAGISTERKA\Obrazy\tmpm\' images(pict).name]);
 
 %%
 % f0=imnoise(f0,'salt & pepper',0.3);
@@ -70,7 +77,7 @@ for step=1:50000
                 j0=j+t_r;
                 
                 
-                if sum(sum(phi(i0-p_r:i0+p_r,j0-p_r:j0+p_r)))>10
+                if sum(sum(phi(i0-p_r:i0+p_r,j0-p_r:j0+p_r)))>7
                     
                     sum_yw=sum(sum(u(i0-s_r:i0+s_r,j0-s_r:j0+s_r,k).*w(:,:,i,j,k)));
                     sum_w=sum(sum(w(:,:,i,j,k)));
@@ -92,8 +99,12 @@ for step=1:50000
         
 %         imwrite(uint8(u0),[ '..\ren1\q' num2str(step) '.bmp']);
         
-        figure; imagesc(uint8(u0)); colormap(gray); axis off; axis equal;
-        pause(1)
+%         figure; imagesc(uint8(u0)); colormap(gray); axis off; axis equal;
+%         pause(1)
+        
+        imwrite(uint8(u0),['C:\MAREK\MAGISTERKA\Obrazy\tmpt\' 'step' num2str(step) images(pict).name]);
+%         figure; imagesc(uint8(u0)); colormap(gray); axis off; axis equal;
+%         pause(1)
         
         if(sum(phi(:)) == size(phi,1)*size(phi,2))
            break
@@ -103,7 +114,7 @@ for step=1:50000
     toc
     
 end
-figure; imagesc(uint8(u0)); colormap(gray); axis off; axis equal;
+end
 
 function weight=updateWeight(u0,u,h,kernel,kernelk,t_r,s_r,p_r,sw,phi,w)
 
