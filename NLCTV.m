@@ -24,7 +24,7 @@ figure; imagesc(f0); colormap(gray); axis off; axis equal;
 f0=double(f0);
 [m,n,c]=size(f0);
 
-sw =4;
+sw =4; nm='FIX';
 p_r=2;
 s_r=5;
 p_s =p_r*2+1;
@@ -103,7 +103,7 @@ for step=1:50000
 %         figure; imagesc(uint8(u0)); colormap(gray); axis off; axis equal;
 %         pause(1)
         
-        imwrite(uint8(u0),['C:\MAREK\MAGISTERKA\Obrazy\tmpt\' 'step' num2str(step) images(pict).name]);
+        imwrite(uint8(u0),['C:\MAREK\MAGISTERKA\Obrazy\tmpt\' nm 'step' num2str(step) images(pict).name]);
 %         figure; imagesc(uint8(u0)); colormap(gray); axis off; axis equal;
 %         pause(1)
         
