@@ -1,5 +1,5 @@
 function NLCTV()
-clc
+clc; clear
 
 %%
 %I = imread('C:\MAREK\MAGISTERKA\Obrazy\Obr6m3.png');
@@ -52,8 +52,7 @@ tic
 for step=1:50000
     step
     
-    u=padarray(u0,[t_r t_r],'replicate');
-    
+    u=padarray(u0,[t_r t_r],'symmetric');
     if step==1
         
         w=updateWeight(u0,u,h,kernel,kernelk,t_r,s_r,p_r,sw,phi,w);
@@ -76,16 +75,19 @@ for step=1:50000
                 i0=i+t_r;
                 j0=j+t_r;
                 
+                if phi(i0,j0) < 1
                 
-                if sum(sum(phi(i0-p_r:i0+p_r,j0-p_r:j0+p_r)))>7
+                    if sum(sum(phi(i0-p_r:i0+p_r,j0-p_r:j0+p_r))) > 0
                     
-                    sum_yw=sum(sum(u(i0-s_r:i0+s_r,j0-s_r:j0+s_r,k).*w(:,:,i,j,k)));
-                    sum_w=sum(sum(w(:,:,i,j,k)));
-                    u0(i,j,k)=(lamda*PHI(i0,j0)*f0(i,j,k)+sum_yw)/(lamda*PHI(i0,j0)+sum_w);
+                        sum_yw=sum(sum(u(i0-s_r:i0+s_r,j0-s_r:j0+s_r,k).*w(:,:,i,j,k)));
+                        sum_w=sum(sum(w(:,:,i,j,k)));
+                        u0(i,j,k)=(lamda*PHI(i0,j0)*f0(i,j,k)+sum_yw)/(lamda*PHI(i0,j0)+sum_w);
+                    
+                    end
                     
                 else
                     
-                    u0(i,j,k)=f0(i,j,k);
+                    u0(i,j,k)=u0(i,j,k);
                     
                 end
                 
@@ -93,7 +95,6 @@ for step=1:50000
             end
         end
     end
-    
     
     if mod(step,10)==0
         
