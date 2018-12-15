@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <stdlib.h>
 #include "mex.h"
 
+#define printfFnc(...) { mexPrintf(__VA_ARGS__); mexEvalString("drawnow;");}
 
 void showMatrix2D(
     int m,
@@ -17,9 +17,9 @@ void showMatrix2D(
     {
         for(j=0;j<n;j++)
         {
-            printf("%.1f ", w[i][j]);
+            printfFnc("%.1f ", w[i][j]);
         }
-    printf("\n");
+    printfFnc("\n");
     }
     }
 
@@ -38,11 +38,11 @@ void showMatrix3D(
         {
             for(j=0;j<n;j++)
             {
-                printf("%.1f ", w[i][j][k]);
+                printfFnc("%.1f ", w[i][j][k]);
             }
-        printf("\n");
+        printfFnc("\n");
         }
-    printf("\n \n");
+    printfFnc("\n \n");
     }
     }
 
@@ -65,22 +65,23 @@ void showMatrixWeight(
         {
             for(m_it=0; m_it<m; m_it++)
             {
-                printf("%d %d %d \n", m_it, n_it, k);
+                printfFnc("%d %d %d \n", m_it, n_it, k);
                 for(i=0; i<s_s; i++)
                 {
                     for(j=0; j<s_s; j++)
                     {
-                        printf("%f ", w[i][j][m_it][n_it][k]);
+                        printfFnc("%f ", w[i][j][m_it][n_it][k]);
                     }
-                    printf("\n");
+                    printfFnc("\n");
                 }
-                printf("\n");
+                printfFnc("\n");
             }
-            printf("\n");
+            printfFnc("\n");
         }
-        printf("\n");
+        printfFnc("\n");
     }
     }
+
 void padarray2d(
     int m,
     int n,
@@ -177,6 +178,33 @@ void padarray3d(
             {
                 new_in[i][j][k]=new_in[i][2*t_r-j][k];
                 new_in[i][new_n-t_r+j][k]=new_in[i][new_n-t_r-2-j][k];
+            }
+        }
+    }
+    }
+
+void initU(
+    int m,
+    int n,
+    int c,
+    int t_r,
+    double in[m][n][c],
+    double new_in[m+(2*t_r)][n+(2*t_r)][c])
+    {
+    printfFnc("INICJALIZACJA U \n");
+    int new_m = m+(2*t_r);
+    int new_n = n+(2*t_r);
+
+    int i,j,k,i0,j0;
+    for(i=0;i<m;i++)
+    {
+        for(j=0;j<n;j++)
+        {
+            i0=i+t_r;
+            j0=j+t_r;
+            for(k=0;k<c;k++)
+            {
+                new_in[i0][j0][k]=in[i][j][k];
             }
         }
     }
@@ -310,6 +338,69 @@ int any(
     return 0;
     }
 
+int allOne(
+    int m,
+    int n,
+    double in[m][n])
+    {
+    int i ,j;
+    for(i=0;i<m;i++)
+    {
+        for(j=0;j<n;j++)
+        {
+            if(in[i][j]<1)
+            {
+                return 0;
+            }
+        }
+    }
+    return 1;
+    }
+
+void updatePhi(
+    int M,
+    int N,
+    int c,
+    double u[M][N][c],
+    double phi[M][N])
+    {
+        int i,j;
+        for(i=0;i<M;i++)
+        {
+            for(j=0;j<N;j++)
+            {
+                if(u[i][j][0]!=0   &&
+                   u[i][j][1]!=255 &&
+                   u[i][j][2]!=0   &&
+                   phi[i][j]  ==0)
+                {
+                    phi[i][j]=1;
+                }
+            }
+        }
+    }
+
+void subWeight(
+    int m,
+    int n,
+    int c,
+    int s_s,
+    float w[s_s][s_s][m][n][c],
+    int iw,
+    int jw,
+    int kw,
+    double out[s_s][s_s])
+    {
+        int i,j;
+        for(i=0;i<s_s;i++)
+        {
+            for(j=0;j<s_s;j++)
+            {
+                out[i][j]=w[i][j][iw][jw][kw];
+            }
+        }
+    }
+
 void updateWeight(
     int m,
     int n,
@@ -329,8 +420,9 @@ void updateWeight(
     int sw,
     double phi[M][N],
     int s_s,
-    double w[s_s][s_s][m][n][c])
+    float w[s_s][s_s][m][n][c])
     {
+    printfFnc("PIERWSZE OBLICZENIE WAGI \n");
     int k_r=sw*p_r;
 
     int i, j, k, r, s, i0, j0, ii, jj;
@@ -376,9 +468,17 @@ void updateWeight(
                                 double retk[2*k_r+1][2*k_r+1];
                                 prod3Matrix(2*p_r+1,2*p_r+1,sphi ,kernel ,diff ,ret);
                                 prod3Matrix(2*k_r+1,2*k_r+1,sphik,kernelk,diffk,retk);
-                                w[ii][jj][i][j][k]=
-                                    exp((-1.0)*sumMatrix(2*p_r+1,2*p_r+1,ret )/(h*h))*
-                                    exp((-1.0)*sumMatrix(2*k_r+1,2*k_r+1,retk)/(h*h));
+                                if (sw!=1)
+                                {
+                                    w[ii][jj][i][j][k]=
+                                        exp((-1.0)*sumMatrix(2*p_r+1,2*p_r+1,ret )/(h*h))*
+                                        exp((-1.0)*sumMatrix(2*k_r+1,2*k_r+1,retk)/(h*h));
+                                }
+                                else
+                                {
+                                    w[ii][jj][i][j][k]=
+                                        exp((-1.0)*sumMatrix(2*p_r+1,2*p_r+1,ret )/(h*h));
+                                }
                             }
                             jj++;
                         }
@@ -410,8 +510,9 @@ void updateWeight2(
     double phi[M][N],
     double PHI[M][N],
     int s_s,
-    double w[s_s][s_s][m][n][c])
+    float w[s_s][s_s][m][n][c])
     {
+    printfFnc("AKTUALIZACJA WAGI \n");
     int k_r=sw*p_r;
 
     int i, j, k, r, s, i0, j0, ii, jj;
@@ -428,7 +529,7 @@ void updateWeight2(
                 subMatrix   (p_r,M,N,phi,i0,j0,sphi);
                 subMatrix   (k_r,M,N,phi,i0,j0,sphik);
 
-                if (PHI(i0,j0)==0)
+                if (PHI[i0][j0]==0)
                 {
                     if(any(2*p_r+1,2*p_r+1,sphi) == 1)
                     {
@@ -459,9 +560,17 @@ void updateWeight2(
                                     double retk[2*k_r+1][2*k_r+1];
                                     prod3Matrix(2*p_r+1,2*p_r+1,sphi ,kernel ,diff ,ret);
                                     prod3Matrix(2*k_r+1,2*k_r+1,sphik,kernelk,diffk,retk);
-                                    w[ii][jj][i][j][k]=
-                                        exp((-1.0)*sumMatrix(2*p_r+1,2*p_r+1,ret )/(h*h))*
-                                        exp((-1.0)*sumMatrix(2*k_r+1,2*k_r+1,retk)/(h*h));
+                                    if (sw!=1)
+                                    {
+                                        w[ii][jj][i][j][k]=
+                                            exp((-1.0)*sumMatrix(2*p_r+1,2*p_r+1,ret )/(h*h))*
+                                            exp((-1.0)*sumMatrix(2*k_r+1,2*k_r+1,retk)/(h*h));
+                                    }
+                                    else
+                                    {
+                                        w[ii][jj][i][j][k]=
+                                            exp((-1.0)*sumMatrix(2*p_r+1,2*p_r+1,ret )/(h*h));
+                                    }
                                 }
                                 jj++;
                             }
@@ -474,58 +583,13 @@ void updateWeight2(
     }
     }
 
-void updatePhi(
-    int M,
-    int N,
-    int c,
-    double u[M][N][c],
-    double phi[M][N])
-    {
-        int i,j,k,pom;
-        for(i=0;i<M;i++)
-        {
-            for(j=0;j<N;j++)
-            {
-                if(u[i][j][0]!=0   ||
-                   u[i][j][1]!=255 ||
-                   u[i][j][2]!=0)
-                {
-                    phi[i][j]=1;
-                }
-            }
-        }
-    }
-
-void subWeight(
-    int m,
-    int n,
-    int c,
-    int s_s,
-    double w[s_s][s_s][m][n][c],
-    int iw,
-    int jw,
-    int kw,
-    double out[s_s][s_s])
-    {
-        int i,j
-    for(i=0;i<s_s;i++)
-    {
-        for(j=0;j<s_s;j++)
-        {
-            out[i][j]=w[i][j][iw][jw][kw];
-        }
-    }
-    }
-
 void solveNLCTV(
-    int step,
     int m,
     int n,
     int c,
     double u0[m][n][c],
     int M,
     int N,
-    double u[M][N][c],
     int h,
     int p_s,
     double kernel[p_s][p_s],
@@ -538,56 +602,68 @@ void solveNLCTV(
     double phi[M][N],
     double PHI[M][N],
     int s_s,
-    double w[s_s][s_s][m][n][c],
-    double lambda,
+    float w[s_s][s_s][m][n][c],
+    double lamda,
     double f0[m][n][c])
     {
-    int i,j,k,i0,j0;
-    padarray3d(m,n,c,t_r,u0,u);
-    if(step == 1)
+    int i,j,k,i0,j0,step;
+    double u [M][N][c];
+
+    initU(m,n,c,t_r,u0,u);
+
+    for(step=1;step<99999;step++)
     {
-        updateWeight(m,n,c,u0,M,N,u,h,p_s,kernel,
-            p_sw,kernelk,t_r,s_r,p_r,sw,phi,s_s,w);
-    }
-    if(step%10==0)
-    {
-        updatePhi(M,N,c,u,phi);
-        updateWeight2(m,n,c,u0,M,N,u,h,p_s,kernel,
-            p_sw,kernelk,t_r,s_r,p_r,sw,phi,PHI,s_s,w);
-    }
-    for(i=0;i<m;i++)
-    {
-        for(j=0;j<n;j++)
+        padarray3d(m,n,c,t_r,u0,u);
+        if(step==1)
         {
-            for(k=0;k<c;k++)
+            updateWeight(m,n,c,u0,M,N,u,h,p_s,kernel,
+                p_sw,kernelk,t_r,s_r,p_r,sw,phi,s_s,w);
+        }
+        if(step>9 && step%10==0)
+        {
+            printfFnc("Step: %d \n", step);
+            updatePhi(M,N,c,u,phi);
+            updateWeight2(m,n,c,u0,M,N,u,h,p_s,kernel,
+                p_sw,kernelk,t_r,s_r,p_r,sw,phi,PHI,s_s,w);
+        }
+        for(i=0;i<m;i++)
+        {
+            for(j=0;j<n;j++)
             {
-                i0=i+t_r;
-                j0=j+t_r;
-
-                if(phi(i0,j0)<1)
+                for(k=0;k<c;k++)
                 {
-                    double sphi [2*p_r+1][2*p_r+1];
-                    subMatrix   (p_r,M,N,phi,i0,j0,sphi);
-                    if(any(2*p_r+1,2*p_r+1,sphi)==1)
-                    {
-                        double subw[s_s][s_s];
-                        double subu[s_s][s_s];
-                        subWeight(m,n,c,s_s,w,i,j,k,subw);
-                        subMatrix3D(s_r,M,N,c,k,u,i0,j0,subu);
-                        double prod[s_s][s_s];
-                        prodMatrix(s_s,s_s,subw,subu,prod);
-                        double sum_yw, sum_w;
-                        sum_yw=sumMatrix(s_s,s_s,prod);
-                        sum_w =sumMatrix(s_s,s_s,subw);
+                    i0=i+t_r;
+                    j0=j+t_r;
 
-                        u0[i][j][k]=(lamda*PHI[i0][j0]*f0[i][j][k]+sum_yw)/(lamda*PHI[i0][j0]+sum_w);
-                    }
-                    else
+                    if(phi[i0][j0]<1)
                     {
-                        u0[i][j][k]=u0[i][j][k];
+                        double sphi [2*p_r+1][2*p_r+1];
+                        subMatrix   (p_r,M,N,phi,i0,j0,sphi);
+                        if(any(2*p_r+1,2*p_r+1,sphi)==1)
+                        {
+                            double subw[s_s][s_s];
+                            double subu[s_s][s_s];
+                            subWeight(m,n,c,s_s,w,i,j,k,subw);
+                            subMatrix3D(s_r,M,N,c,k,u,i0,j0,subu);
+                            double prod[s_s][s_s];
+                            prodMatrix(s_s,s_s,subw,subu,prod);
+                            double sum_yw, sum_w;
+                            sum_yw=sumMatrix(s_s,s_s,prod);
+                            sum_w =sumMatrix(s_s,s_s,subw);
+                            u0[i][j][k]=(lamda*PHI[i0][j0]*f0[i][j][k]+sum_yw)/(lamda*PHI[i0][j0]+sum_w);
+                        }
+                        else
+                        {
+                            u0[i][j][k]=u0[i][j][k];
+                        }
                     }
                 }
             }
+        }
+        if (allOne(M,N,phi)==1)
+        {
+            printfFnc("Koniec step: %d", step);
+            break;
         }
     }
     }
@@ -601,32 +677,50 @@ void mexFunction(int numOut, mxArray *pmxOut[],
     double *u0u      = mxGetPr(pmxIn[3]);
     int M            = mxGetScalar(pmxIn[4]);
     int N            = mxGetScalar(pmxIn[5]);
-    double *uu       = mxGetPr(pmxIn[6]);
-    int h            = mxGetScalar(pmxIn[7]);
-    int p_s          = mxGetScalar(pmxIn[8]);
-    double *kernelu  = mxGetPr(pmxIn[9]);
-    int p_sw         = mxGetScalar(pmxIn[10]);
-    double *kernelku = mxGetPr(pmxIn[11]);
-    int t_r          = mxGetScalar(pmxIn[12]);
-    int s_r          = mxGetScalar(pmxIn[13]);
-    int p_r          = mxGetScalar(pmxIn[14]);
-    int sw           = mxGetScalar(pmxIn[15]);
-    double *phiu     = mxGetPr(pmxIn[16]);
+    int h            = mxGetScalar(pmxIn[6]);
+    int p_s          = mxGetScalar(pmxIn[7]);
+    double *kernelu  = mxGetPr(pmxIn[8]);
+    int p_sw         = mxGetScalar(pmxIn[9]);
+    double *kernelku = mxGetPr(pmxIn[10]);
+    int t_r          = mxGetScalar(pmxIn[11]);
+    int s_r          = mxGetScalar(pmxIn[12]);
+    int p_r          = mxGetScalar(pmxIn[13]);
+    int sw           = mxGetScalar(pmxIn[14]);
+    double *phiu     = mxGetPr(pmxIn[15]);
+    double *PHIu     = mxGetPr(pmxIn[16]);
     int s_s          = mxGetScalar(pmxIn[17]);
-    double *wu       = mxGetPr(pmxIn[18]);
+    double lamda     = mxGetScalar(pmxIn[18]);
+    double *f0u      = mxGetPr(pmxIn[19]);
 
-    int i, it, in4d, in2d, k, l, c_it;
+    int i,j,it,in4d,in2d,k,l,c_it,si,sj;
 
     double u0[m][n][c];
-    double u [M][N][c];
+    double f0[m][n][c];
 
     double kernel [p_s] [p_s];
     double kernelk[p_sw][p_sw];
 
-    double phi[M][N];
+    double phi[M][N], PHI[M][N];
 
-    double w[s_s][s_s][m][n][c];
-
+    printfFnc("UTWORZENIE ZMIENNEJ WAGI: ");
+    float w[s_s][s_s][m][n][c];
+    for(si=0;si<s_s;si++)
+    {
+        for(sj=0;sj<s_s;sj++)
+        {
+            for(i=0;i<m;i++)
+            {
+                for(j=0;j<n;j++)
+                {
+                    for(k=0;k<c;k++)
+                    {
+                        w[si][sj][i][j][k]=0;
+                    }
+                }
+            }
+        }
+    }
+    printfFnc("OK \n");
     c_it=0;
     it  =0;
     while(c_it<c)
@@ -636,22 +730,8 @@ void mexFunction(int numOut, mxArray *pmxOut[],
             in2d=0;
             while(in2d<m*n)
             {
-                u0[in2d%m][in2d/m][c_it]=u0u[it++];
-                in2d++;
-            }
-        }
-        c_it++;
-    }
-    c_it=0;
-    it  =0;
-    while(c_it<c)
-    {
-        while(it<(c_it+1)*M*N)
-        {
-            in2d=0;
-            while(in2d<M*N)
-            {
-                u[in2d%M][in2d/M][c_it]=uu[it++];
+                u0[in2d%m][in2d/m][c_it]=u0u[it];
+                f0[in2d%m][in2d/m][c_it]=f0u[it++];
                 in2d++;
             }
         }
@@ -668,90 +748,15 @@ void mexFunction(int numOut, mxArray *pmxOut[],
     for(i=0;i<M*N;i++)
     {
         phi[i%M][i/M] = phiu[i];
-    }
-    it   = 0;
-    in4d = 0;
-    c_it = 0;
-    while (c_it<c)
-    {
-        while (it < (c_it+1)*s_s*s_s*m*n)
-        {
-            k = in4d%m;
-            l = in4d/m;
-
-            in2d=0;
-            while (in2d < s_s*s_s)
-            {
-                w[in2d%s_s][in2d/s_s][k][l][c_it]=wu[it++];
-                in2d++;
-            }
-            in4d++;
-        }
-        c_it++;
-        in4d=0;
+        PHI[i%M][i/M] = PHIu[i];
     }
 
+    solveNLCTV(m,n,c,u0,M,N,h,p_s,kernel,p_sw,kernelk,t_r,
+               s_r,p_r,sw,phi,PHI,s_s,w,lamda,f0);
 
-    updateWeight(m,n,c,u0,M,N,u,h,p_s,kernel,
-        p_sw,kernelk,t_r,s_r,p_r,sw,phi,s_s,w);
-
-    pmxOut[0] = mxCreateDoubleMatrix(1,s_s*s_s*m*n*c,mxREAL);//num
-    double *ret;
-    ret = mxGetPr(pmxOut[0]);
-
-    it   = 0;
-    in4d = 0;
-    c_it = 0;
-    while (c_it<c)
-    {
-        while (it < (c_it+1)*s_s*s_s*m*n)
-        {
-            k = in4d%m;
-            l = in4d/m;
-
-            in2d=0;
-            while (in2d < s_s*s_s)
-            {
-                ret[it++]=w[in2d%s_s][in2d/s_s][k][l][c_it];
-                in2d++;
-            }
-            in4d++;
-        }
-        c_it++;
-        in4d=0;
-    }
-
-}
-/*
-void mexFunction(int numOut, mxArray *pmxOut[],
-                 int numIn, const mxArray *pmxIn[])
-{
-    int m            = mxGetScalar(pmxIn[0]);
-    int n            = mxGetScalar(pmxIn[1]);
-    int c            = mxGetScalar(pmxIn[2]);
-    int pad          = mxGetScalar(pmxIn[3]);
-    double *test1p   = mxGetPr(pmxIn[4]);
-    double *test2p   = mxGetPr(pmxIn[5]);
-    double *test3p   = mxGetPr(pmxIn[6]);
-    int p_r          = mxGetScalar(pmxIn[7]);
-    int i_0          = mxGetScalar(pmxIn[8]);
-    int j_0          = mxGetScalar(pmxIn[9]);
-
-    i_0--;
-    j_0--;
-
-    double toAny[3][3] = { { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 1 } };
-
-    double test1[m][n];
-    double test2[m][n];
-    double test3[m][n][c];
-
-    int i, it, c_it, in2d;
-    for(i=0;i<m*n;i++)
-    {
-        test1[i%m][i/m] = test1p[i];
-        test2[i%m][i/m] = test2p[i];
-    }
+    pmxOut[0] = mxCreateDoubleMatrix(1,m*n*c,mxREAL);
+    double *ret1;
+    ret1 = mxGetPr(pmxOut[0]);
 
     c_it=0;
     it  =0;
@@ -762,96 +767,10 @@ void mexFunction(int numOut, mxArray *pmxOut[],
             in2d=0;
             while(in2d<m*n)
             {
-                test3[in2d%m][in2d/m][c_it]=test3p[it++];
+                ret1[it++] = u0[in2d%m][in2d/m][c_it];
                 in2d++;
             }
         }
         c_it++;
-    }
-
-    int M = 2*pad+m;
-    int N = 2*pad+n;
-    double test1r[M][N];
-    double test2r[M][N];
-    double test3r[M][N][c];
-    double test4r[2*p_r+1][2*p_r+1];
-    double test5r[2*p_r+1][2*p_r+1];
-    double test6r[2*p_r+1][2*p_r+1];
-    double test7r[2*p_r+1][2*p_r+1];
-    double test8r[2*p_r+1][2*p_r+1];
-
-    pmxOut[0] = mxCreateDoubleMatrix(1,M*N,mxREAL);
-    pmxOut[1] = mxCreateDoubleMatrix(1,M*N,mxREAL);
-    pmxOut[2] = mxCreateDoubleMatrix(1,M*N*c,mxREAL);
-    pmxOut[3] = mxCreateDoubleMatrix(1,(2*p_r+1)*(2*p_r+1),mxREAL);
-    pmxOut[4] = mxCreateDoubleMatrix(1,(2*p_r+1)*(2*p_r+1),mxREAL);
-    pmxOut[5] = mxCreateDoubleMatrix(1,(2*p_r+1)*(2*p_r+1),mxREAL);
-    pmxOut[6] = mxCreateDoubleMatrix(1,(2*p_r+1)*(2*p_r+1),mxREAL);
-    pmxOut[7] = mxCreateDoubleMatrix(1,(2*p_r+1)*(2*p_r+1),mxREAL);
-    pmxOut[8] = mxCreateDoubleMatrix(1,1,mxREAL);
-    pmxOut[9] = mxCreateNumericMatrix(1, 1,mxINT8_CLASS, 0);
-
-    double *ret1 = mxGetPr(pmxOut[0]);
-    double *ret2 = mxGetPr(pmxOut[1]);
-    double *ret3 = mxGetPr(pmxOut[2]);
-    double *ret4 = mxGetPr(pmxOut[3]);
-    double *ret5 = mxGetPr(pmxOut[4]);
-    double *ret6 = mxGetPr(pmxOut[5]);
-    double *ret7 = mxGetPr(pmxOut[6]);
-    double *ret8 = mxGetPr(pmxOut[7]);
-    double *ret9 = mxGetPr(pmxOut[8]);
-    int    *ret10= mxGetPr(pmxOut[9]);
-
-    padarray2d(m,n,pad,test1,test1r);
-    padarray2d(m,n,pad,test2,test2r);
-    padarray3d(m,n,c,pad,test3,test3r);
-    subMatrix3D(p_r,m,n,c,1,test3,i_0,j_0,test4r);
-    subMatrix(p_r,m,n,test1,i_0,j_0,test5r);
-    prodMatrix((2*p_r+1),(2*p_r+1),test5r,test5r,test6r);
-    prod3Matrix((2*p_r+1),(2*p_r+1),test5r,test5r,test5r,test7r);
-    subt2Matrix((2*p_r+1),(2*p_r+1),test4r,test5r,test8r);
-    *ret9 = sumMatrix((2*p_r+1),(2*p_r+1),test8r);
-    *ret10 = any(3,3,toAny);
-
-    int k, l;
-    it =0;
-    while (it < M*N)
-    {
-        k = it%M;
-        l = it/M;
-        ret1[it] =test1r[k][l];
-        ret2[it] =test2r[k][l];
-        it++;
-    }
-
-    c_it=0;
-
-    it  =0;
-    in2d=0;
-    while(c_it<c)
-    {
-        while(it<(c_it+1)*M*N)
-        {
-            in2d=0;
-            while(in2d<M*N)
-            {
-                ret3[it++]=test3r[in2d%M][in2d/M][c_it];
-                in2d++;
-            }
-        }
-        c_it++;
-    }
-
-    it = 0;
-    while (it < (2*p_r+1)*(2*p_r+1))
-    {
-        k = it%(2*p_r+1);
-        l = it/(2*p_r+1);
-        ret4[it]   =test4r[k][l];
-        ret5[it]   =test5r[k][l];
-        ret6[it]   =test6r[k][l];
-        ret7[it]   =test7r[k][l];
-        ret8[it++] =test8r[k][l];
     }
 }
-*/
