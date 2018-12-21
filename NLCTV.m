@@ -74,7 +74,7 @@ for step=1:5000
             i0=i+t_r;
             j0=j+t_r;
                 
-            if sum(sum(phi(i0-p_r:i0+p_r,j0-p_r:j0+p_r)))~=0 && PHI(i0,j0)<1
+            if sum(sum(phi(i0-p_r:i0+p_r,j0-p_r:j0+p_r)))>(p_r*p_s-1) && PHI(i0,j0)<1
                     
                 max_ii=1;
                 max_jj=1;
