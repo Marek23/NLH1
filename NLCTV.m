@@ -96,7 +96,11 @@ for step=1:5000
                         end
                     end
                 end
-                u0(i,j,:)=f0(i-(s_r+1)+max_ii,j-(s_r+1)+max_jj,:);
+                if(step==1)
+                    u0(i,j,:)=f0(i-(s_r+1)+max_ii,j-(s_r+1)+max_jj,:);
+                else
+                    u0(i,j,:)=u0(i-(s_r+1)+max_ii,j-(s_r+1)+max_jj,:);
+                end
             end
               
         end %end for j
