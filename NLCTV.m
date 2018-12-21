@@ -10,7 +10,7 @@ close all
 
 %% 
 %f0=imread(['C:\MAREK\MAGISTERKA\Obrazy\msk\' images(image).name]);
-f0=imread('031g.bmp');
+f0=imread('032g.bmp');
 %%
 % f0=imnoise(f0,'salt & pepper',0.3);
 % imwrite(uint8(f0),[ '..\ren1\q' num2str(1) '.bmp']);
@@ -22,7 +22,7 @@ f0=double(f0);
 [m,n,c]=size(f0);
   
 p_r=1;
-s_r=2;
+s_r=1;
 p_s=p_r*2+1;
 s_s=s_r*2+1;
 t_r=p_r+s_r;
@@ -72,16 +72,35 @@ for step=1:5000
             j0=j+t_r;
                 
             if sum(sum(phi(i0-p_r:i0+p_r,j0-p_r:j0+p_r)))~=0 && PHI(i0,j0)<1
+                    
+                max_ii=1;
+                max_jj=1;
+                for ii=1:s_s
+                    for jj=1:s_s
                         
-                u0(i,j,k)=f0(i,j,k);
+                        x1=w(ii,jj,i,j,1);
+                        x2=w(ii,jj,i,j,2);
+                        x3=w(ii,jj,i,j,3);
                         
+                        m1=w(max_ii,max_jj,i,j,1);
+                        m2=w(max_ii,max_jj,i,j,2);
+                        m3=w(max_ii,max_jj,i,j,3);
+                        
+                        if(sumsqr([x1,x2,x3])...
+                          >sumsqr([m1,m2,m3]))
+                            max_ii=ii;
+                            max_jj=jj;
+                        end
+                    end
+                end
+                u0(i,j,:)=f0(i-(s_r+1)+max_ii,j-(s_r+1)+max_jj,:);
             end
-  
+              
         end %end for j
     end %end for i
 
     
-    if mod(step,10)==0
+%     if mod(step,10)==0
         
 %         imwrite(uint8(u0),['C:\MAREK\MAGISTERKA\Obrazy\test\' 'step' num2str(step) images(image).name]);
         figure; imagesc(uint8(u0)); colormap(gray); axis off; axis equal;
@@ -91,7 +110,7 @@ for step=1:5000
            break
         end
         
-    end
+%     end
     toc
     
 end
