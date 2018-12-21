@@ -64,8 +64,11 @@ for step=1:5000
         
     end
     
-
-   for i=1:m
+	if(sum(phi(:)) == size(phi,1)*size(phi,2))
+        break
+    end
+    
+	for i=1:m
         for j=1:n
             
             i0=i+t_r;
@@ -97,7 +100,7 @@ for step=1:5000
             end
               
         end %end for j
-    end %end for i
+	end %end for i
 
     
 %     if mod(step,10)==0
@@ -105,10 +108,6 @@ for step=1:5000
 %         imwrite(uint8(u0),['C:\MAREK\MAGISTERKA\Obrazy\test\' 'step' num2str(step) images(image).name]);
         figure; imagesc(uint8(u0)); colormap(gray); axis off; axis equal;
         pause(1)
-
-        if(sum(phi(:)) == size(phi,1)*size(phi,2))
-           break
-        end
         
 %     end
     toc
