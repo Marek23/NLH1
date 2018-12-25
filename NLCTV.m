@@ -10,7 +10,7 @@ close all
 
 %% 
 %f0=imread(['C:\MAREK\MAGISTERKA\Obrazy\msk\' images(image).name]);
-f0=imread('032g.bmp');
+f0=imread('Structurem2.bmp');
 %%
 % f0=imnoise(f0,'salt & pepper',0.3);
 % imwrite(uint8(f0),[ '..\ren1\q' num2str(1) '.bmp']);
@@ -21,14 +21,15 @@ f0=double(f0);
 
 [m,n,c]=size(f0);
   
-p_r=1;
-s_r=1;
+p_r=3;
+s_r=5;
 p_s=p_r*2+1;
 s_s=s_r*2+1;
 t_r=p_r+s_r;
+c_r=4;
 
 BrokenAreaColor=255;
-sigma=5;h=20;
+sigma=5;h=100;
 
 kernel=fspecial('gaussian',p_s,sigma); %¸ßË¹ºËº¯Êý
 
@@ -38,6 +39,7 @@ phi=double(1-((f0(:,:,1)==0) & ...
 
 phi=padarray(phi,[t_r t_r],'symmetric');
 PHI=phi;
+PHI_C=phi;
 
 u0=f0;
 
@@ -68,13 +70,15 @@ for step=1:5000
         break
     end
     
+    PHI_C=phi;
+    
 	for i=1:m
         for j=1:n
             
             i0=i+t_r;
             j0=j+t_r;
                 
-            if sum(sum(phi(i0-p_r:i0+p_r,j0-p_r:j0+p_r)))>(p_r*p_s-1) && PHI(i0,j0)<1
+            if sum(sum(phi(i0-p_r:i0+p_r,j0-p_r:j0+p_r)))>(p_r*p_s-1) && PHI_C(i0,j0)<1
                     
                 max_ii=1;
                 max_jj=1;
@@ -97,9 +101,31 @@ for step=1:5000
                     end
                 end
                 if(step==1)
-                    u0(i,j,:)=f0(i-(s_r+1)+max_ii,j-(s_r+1)+max_jj,:);
+                    for iii=-c_r:c_r
+                        
+                        for jjj=-c_r:c_r
+                            
+                            if(PHI_C(i0+iii,j0+jjj)<1)
+                                u0(i+iii,j+jjj,:)=...
+                                    f0(i-(s_r+1)+max_ii+iii,j-(s_r+1)+max_jj+jjj,:);
+                                PHI_C(i0+iii,j0+jjj,:)=1;
+                            end
+                            
+                        end
+                    end
                 else
-                    u0(i,j,:)=u0(i-(s_r+1)+max_ii,j-(s_r+1)+max_jj,:);
+                    for iii=-c_r:c_r
+                        
+                        for jjj=-c_r:c_r
+                            
+                            if(PHI_C(i0+iii,j0+jjj)<1)
+                                u0(i+iii,j+jjj,:)=...
+                                    u0(i-(s_r+1)+max_ii+iii,j-(s_r+1)+max_jj+jjj,:);
+                                PHI_C(i0+iii,j0+jjj,:)=1;
+                            end
+                            
+                        end
+                    end
                 end
             end
               
