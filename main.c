@@ -2,13 +2,14 @@
 #include <stdlib.h>
 #include <math.h>
 #include "mex.h"
+#include "matrix.h"
 
 #define printfFnc(...) { mexPrintf(__VA_ARGS__); mexEvalString("drawnow;");}
 
 void showMatrix2D(
     int m,
     int n,
-    double w[m][n])
+    float **w)
     {
     int i;
     int j;
@@ -17,9 +18,9 @@ void showMatrix2D(
     {
         for(j=0;j<n;j++)
         {
-            printfFnc("%.1f ", w[i][j]);
+            printf("%.1f ", w[i][j]);
         }
-    printfFnc("\n");
+    printf("\n");
     }
     }
 
@@ -27,7 +28,7 @@ void showMatrix3D(
     int m,
     int n,
     int c,
-    double w[m][n][c])
+    float ***w)
     {
     int i;
     int j;
@@ -38,11 +39,11 @@ void showMatrix3D(
         {
             for(j=0;j<n;j++)
             {
-                printfFnc("%.1f ", w[i][j][k]);
+                printf("%.1f ", w[i][j][k]);
             }
-        printfFnc("\n");
+        printf("\n");
         }
-    printfFnc("\n \n");
+    printf("\n \n");
     }
     }
 
@@ -51,7 +52,7 @@ void showMatrixWeight(
     int m,
     int n,
     int c,
-    double w[s_s][s_s][m][n][c])
+    float *****w)
     {
     int i;
     int j;
@@ -65,20 +66,20 @@ void showMatrixWeight(
         {
             for(m_it=0; m_it<m; m_it++)
             {
-                printfFnc("%d %d %d \n", m_it, n_it, k);
+                printf("%d %d %d \n", m_it, n_it, k);
                 for(i=0; i<s_s; i++)
                 {
                     for(j=0; j<s_s; j++)
                     {
-                        printfFnc("%f ", w[i][j][m_it][n_it][k]);
+                        printf("%f ", w[i][j][m_it][n_it][k]);
                     }
-                    printfFnc("\n");
+                    printf("\n");
                 }
-                printfFnc("\n");
+                printf("\n");
             }
-            printfFnc("\n");
+            printf("\n");
         }
-        printfFnc("\n");
+        printf("\n");
     }
     }
 
@@ -86,8 +87,8 @@ void padarray2d(
     int m,
     int n,
     int t_r,
-    double in[m][n],
-    double new_in[m+(2*t_r)][n+(2*t_r)])
+    float **in,
+    float **new_in)
     {
     int new_m = m+(2*t_r);
     int new_n = n+(2*t_r);
@@ -133,8 +134,8 @@ void padarray3d(
     int n,
     int c,
     int t_r,
-    double in[m][n][c],
-    double new_in[m+(2*t_r)][n+(2*t_r)][c])
+    float ***in,
+    float ***new_in)
     {
     int new_m = m+(2*t_r);
     int new_n = n+(2*t_r);
@@ -188,8 +189,8 @@ void initU(
     int n,
     int c,
     int t_r,
-    double in[m][n][c],
-    double new_in[m+(2*t_r)][n+(2*t_r)][c])
+    float ***in,
+    float ***new_in)
     {
     printfFnc("INICJALIZACJA U \n");
     int new_m = m+(2*t_r);
@@ -216,10 +217,10 @@ void subMatrix3D(
     int n,
     int c,
     int k,
-    double in[m][n][c],
+    float ***in,
     int i0,
     int j0,
-    double out[2*p_r+1][2*p_r+1])
+    float **out)
     {
     int i ,j;
     for(i=0;i<(2*p_r+1);i++)
@@ -235,10 +236,10 @@ void subMatrix(
     int p_r,
     int m,
     int n,
-    double in[m][n],
+    float **in,
     int i0,
     int j0,
-    double out[2*p_r+1][2*p_r+1])
+    float **out)
     {
     int i ,j;
     for(i=0;i<(2*p_r+1);i++)
@@ -253,9 +254,9 @@ void subMatrix(
 void prodMatrix(
     int m,
     int n,
-    double in1[m][n],
-    double in2[m][n],
-    double prod[m][n])
+    float **in1,
+    float **in2,
+    float **prod)
     {
     int i ,j;
     for(i=0;i<m;i++)
@@ -270,10 +271,10 @@ void prodMatrix(
 void prod3Matrix(
     int m,
     int n,
-    double in1[m][n],
-    double in2[m][n],
-    double in3[m][n],
-    double prod[m][n])
+    float **in1,
+    float **in2,
+    float **in3,
+    float **prod)
     {
     int i ,j;
     for(i=0;i<m;i++)
@@ -288,9 +289,9 @@ void prod3Matrix(
 void subt2Matrix(
     int m,
     int n,
-    double from[m][n],
-    double q[m][n],
-    double out[m][n])
+    float **from,
+    float **q,
+    float **out)
     {
     int i ,j;
     for(i=0;i<m;i++)
@@ -302,13 +303,13 @@ void subt2Matrix(
     }
     }
 
-double sumMatrix(
+float sumMatrix(
     int m,
     int n,
-    double in[m][n])
+    float **in)
     {
     int i ,j;
-    double sum=0;
+    float sum=0;
     for(i=0;i<m;i++)
     {
         for(j=0;j<n;j++)
@@ -322,7 +323,7 @@ double sumMatrix(
 int any(
     int m,
     int n,
-    double in[m][n])
+    float **in)
     {
     int i ,j;
     for(i=0;i<m;i++)
@@ -341,7 +342,7 @@ int any(
 int allOne(
     int m,
     int n,
-    double in[m][n])
+    float **in)
     {
     int i ,j;
     for(i=0;i<m;i++)
@@ -361,8 +362,8 @@ void updatePhi(
     int M,
     int N,
     int c,
-    double u[M][N][c],
-    double phi[M][N])
+    float ***u,
+    float ** phi)
     {
         int i,j;
         for(i=0;i<M;i++)
@@ -385,11 +386,11 @@ void subWeight(
     int n,
     int c,
     int s_s,
-    float w[s_s][s_s][m][n][c],
+    float *****w,
     int iw,
     int jw,
     int kw,
-    double out[s_s][s_s])
+    float **out)
     {
         int i,j;
         for(i=0;i<s_s;i++)
@@ -405,27 +406,27 @@ void updateWeight(
     int m,
     int n,
     int c,
-    double u0[m][n][c],
+    float ***u0,
     int M,
     int N,
-    double u[M][N][c],
+    float ***u,
     int h,
     int p_s,
-    double kernel[p_s][p_s],
+    float **kernel,
     int p_sw,
-    double kernelk[p_sw][p_sw],
+    float **kernelk,
     int t_r,
     int s_r,
     int p_r,
     int sw,
-    double phi[M][N],
+    float **phi,
     int s_s,
-    float w[s_s][s_s][m][n][c])
+    float *****w)
     {
     printfFnc("PIERWSZE OBLICZENIE WAGI \n");
     int k_r=sw*p_r;
 
-    int i, j, k, r, s, i0, j0, ii, jj;
+    int i, j, k, r, s, i0, j0, ii, jj, iii;
     for(i=0;i<m;i++)
     {
         for(j=0;j<n;j++)
@@ -434,15 +435,36 @@ void updateWeight(
             {
                 i0=i+t_r;
                 j0=j+t_r;
-                double sphi [2*p_r+1][2*p_r+1];
-                double sphik[2*k_r+1][2*k_r+1];
+
+                float **sphi;
+                sphi = calloc(2*p_r+1, sizeof(float *));
+                for(iii = 0; iii < 2*p_r+1; iii++) { 
+                   sphi[iii] = calloc(2*p_r+1, sizeof(float));
+                }
+
+                float **sphik;
+                sphik = calloc(2*k_r+1, sizeof(float *));
+                for(iii = 0; iii < 2*k_r+1; iii++) { 
+                   sphik[iii] = calloc(2*k_r+1, sizeof(float));
+                }
+
                 subMatrix   (p_r,M,N,phi,i0,j0,sphi);
                 subMatrix   (k_r,M,N,phi,i0,j0,sphik);
 
                 if(any(2*p_r+1,2*p_r+1,sphi) == 1)
                 {
-                    double W1[2*p_r+1][2*p_r+1];
-                    double W1k[2*k_r+1][2*k_r+1];
+                    float **W1;
+                    W1 = calloc(2*p_r+1, sizeof(float *));
+                    for(iii = 0; iii < 2*p_r+1; iii++) { 
+                        W1[iii] = calloc(2*p_r+1, sizeof(float));
+                    }
+
+                    float **W1k;
+                    W1k = calloc(2*k_r+1, sizeof(float *));
+                    for(iii = 0; iii < 2*k_r+1; iii++) { 
+                        W1k[iii] = calloc(2*k_r+1, sizeof(float));
+                    }
+
                     subMatrix3D(p_r,M,N,c,k,u,i0,j0,W1);
                     subMatrix3D(k_r,M,N,c,k,u,i0,j0,W1k);
 
@@ -454,18 +476,48 @@ void updateWeight(
                         {
                             if(phi[r][s]!=0)
                             {
-                                double W2 [2*p_r+1][2*p_r+1];
-                                double W2k[2*k_r+1][2*k_r+1];
+                                float **W2;
+                                W2 = calloc(2*p_r+1, sizeof(float *));
+                                for(iii = 0; iii < 2*p_r+1; iii++) { 
+                                    W2[iii] = calloc(2*p_r+1, sizeof(float));
+                                }
+
+                                float **W2k;
+                                W2k = calloc(2*k_r+1, sizeof(float *));
+                                for(iii = 0; iii < 2*k_r+1; iii++) { 
+                                   W2k[iii] = calloc(2*k_r+1, sizeof(float));
+                                }
+
                                 subMatrix3D(p_r,M,N,c,k,u,r,s,W2);
                                 subMatrix3D(k_r,M,N,c,k,u,r,s,W2k);
 
-                                double diff [2*p_r+1][2*p_r+1];
-                                double diffk[2*k_r+1][2*k_r+1];
+                                float **diff;
+                                diff = calloc(2*p_r+1, sizeof(float *));
+                                for(iii = 0; iii < 2*p_r+1; iii++) { 
+                                    diff[iii] = calloc(2*p_r+1, sizeof(float));
+                                }
+
+                                float **diffk;
+                                diffk = calloc(2*k_r+1, sizeof(float *));
+                                for(iii = 0; iii < 2*k_r+1; iii++) { 
+                                    diffk[iii] = calloc(2*k_r+1, sizeof(float));
+                                }
+
                                 subt2Matrix (2*p_r+1,2*p_r+1,W1,  W2  ,diff);
                                 subt2Matrix (2*k_r+1,2*k_r+1,W1k, W2k ,diffk);
 
-                                double ret [2*p_r+1][2*p_r+1];
-                                double retk[2*k_r+1][2*k_r+1];
+                                float **ret;
+                                ret = calloc(2*p_r+1, sizeof(float *));
+                                for(iii = 0; iii < 2*p_r+1; iii++) { 
+                                    ret[iii] = calloc(2*p_r+1, sizeof(float));
+                                }
+
+                                float **retk;
+                                retk = calloc(2*k_r+1, sizeof(float *));
+                                for(iii = 0; iii < 2*k_r+1; iii++) { 
+                                    retk[iii] = calloc(2*k_r+1, sizeof(float));
+                                }
+
                                 prod3Matrix(2*p_r+1,2*p_r+1,sphi ,kernel ,diff ,ret);
                                 prod3Matrix(2*k_r+1,2*k_r+1,sphik,kernelk,diffk,retk);
                                 if (sw!=1)
@@ -494,28 +546,28 @@ void updateWeight2(
     int m,
     int n,
     int c,
-    double u0[m][n][c],
+    float ***u0,
     int M,
     int N,
-    double u[M][N][c],
+    float ***u,
     int h,
     int p_s,
-    double kernel[p_s][p_s],
+    float **kernel,
     int p_sw,
-    double kernelk[p_sw][p_sw],
+    float **kernelk,
     int t_r,
     int s_r,
     int p_r,
     int sw,
-    double phi[M][N],
-    double PHI[M][N],
+    float **phi,
+    float **PHI,
     int s_s,
-    float w[s_s][s_s][m][n][c])
+    float *****w)
     {
     printfFnc("AKTUALIZACJA WAGI \n");
     int k_r=sw*p_r;
 
-    int i, j, k, r, s, i0, j0, ii, jj;
+    int i, j, k, r, s, i0, j0, ii, jj, iii, jjj;
     for(i=0;i<m;i++)
     {
         for(j=0;j<n;j++)
@@ -524,8 +576,19 @@ void updateWeight2(
             {
                 i0=i+t_r;
                 j0=j+t_r;
-                double sphi [2*p_r+1][2*p_r+1];
-                double sphik[2*k_r+1][2*k_r+1];
+
+                float **sphi;
+                sphi = calloc(2*p_r+1, sizeof(float *));
+                for(iii = 0; iii < 2*p_r+1; iii++) { 
+                   sphi[iii] = calloc(2*p_r+1, sizeof(float));
+                }
+
+                float **sphik;
+                sphik = calloc(2*k_r+1, sizeof(float *));
+                for(iii = 0; iii < 2*k_r+1; iii++) { 
+                   sphik[iii] = calloc(2*k_r+1, sizeof(float));
+                }
+
                 subMatrix   (p_r,M,N,phi,i0,j0,sphi);
                 subMatrix   (k_r,M,N,phi,i0,j0,sphik);
 
@@ -533,8 +596,19 @@ void updateWeight2(
                 {
                     if(any(2*p_r+1,2*p_r+1,sphi) == 1)
                     {
-                        double W1[2*p_r+1][2*p_r+1];
-                        double W1k[2*k_r+1][2*k_r+1];
+
+                        float **W1;
+                        W1 = calloc(2*p_r+1, sizeof(float *));
+                        for(iii = 0; iii < 2*p_r+1; iii++) { 
+                            W1[iii] = calloc(2*p_r+1, sizeof(float));
+                        }
+
+                        float **W1k;
+                        W1k = calloc(2*k_r+1, sizeof(float *));
+                        for(iii = 0; iii < 2*k_r+1; iii++) { 
+                            W1k[iii] = calloc(2*k_r+1, sizeof(float));
+                        }
+
                         subMatrix3D(p_r,M,N,c,k,u,i0,j0,W1);
                         subMatrix3D(k_r,M,N,c,k,u,i0,j0,W1k);
 
@@ -546,21 +620,51 @@ void updateWeight2(
                             {
                                 if(phi[r][s]!=0)
                                 {
-                                    double W2 [2*p_r+1][2*p_r+1];
-                                    double W2k[2*k_r+1][2*k_r+1];
+                                    float **W2;
+                                    W2 = calloc(2*p_r+1, sizeof(float *));
+                                    for(iii = 0; iii < 2*p_r+1; iii++) { 
+                                        W2[iii] = calloc(2*p_r+1, sizeof(float));
+                                    }
+
+                                    float **W2k;
+                                    W2k = calloc(2*k_r+1, sizeof(float *));
+                                    for(iii = 0; iii < 2*k_r+1; iii++) { 
+                                       W2k[iii] = calloc(2*k_r+1, sizeof(float));
+                                    }
+
+                                    float **diff;
+                                    diff = calloc(2*p_r+1, sizeof(float *));
+                                    for(iii = 0; iii < 2*p_r+1; iii++) { 
+                                        diff[iii] = calloc(2*p_r+1, sizeof(float));
+                                    }
+
+                                    float **diffk;
+                                    diffk = calloc(2*k_r+1, sizeof(float *));
+                                    for(iii = 0; iii < 2*k_r+1; iii++) { 
+                                        diffk[iii] = calloc(2*k_r+1, sizeof(float));
+                                    }
+
                                     subMatrix3D(p_r,M,N,c,k,u,r,s,W2);
                                     subMatrix3D(k_r,M,N,c,k,u,r,s,W2k);
 
-                                    double diff [2*p_r+1][2*p_r+1];
-                                    double diffk[2*k_r+1][2*k_r+1];
                                     subt2Matrix (2*p_r+1,2*p_r+1,W1,  W2  ,diff);
                                     subt2Matrix (2*k_r+1,2*k_r+1,W1k, W2k ,diffk);
 
-                                    double ret [2*p_r+1][2*p_r+1];
-                                    double retk[2*k_r+1][2*k_r+1];
+                                    float **ret;
+                                    ret = calloc(2*p_r+1, sizeof(float *));
+                                    for(iii = 0; iii < 2*p_r+1; iii++) { 
+                                        ret[iii] = calloc(2*p_r+1, sizeof(float));
+                                    }
+
+                                    float **retk;
+                                    retk = calloc(2*k_r+1, sizeof(float *));
+                                    for(iii = 0; iii < 2*k_r+1; iii++) { 
+                                        retk[iii] = calloc(2*k_r+1, sizeof(float));
+                                    }
+
                                     prod3Matrix(2*p_r+1,2*p_r+1,sphi ,kernel ,diff ,ret);
                                     prod3Matrix(2*k_r+1,2*k_r+1,sphik,kernelk,diffk,retk);
-                                    if (sw!=1)
+                                   if (sw!=1)
                                     {
                                         w[ii][jj][i][j][k]=
                                             exp((-1.0)*sumMatrix(2*p_r+1,2*p_r+1,ret )/(h*h))*
@@ -587,27 +691,35 @@ void solveNLCTV(
     int m,
     int n,
     int c,
-    double u0[m][n][c],
+    float ***u0,
     int M,
     int N,
     int h,
     int p_s,
-    double kernel[p_s][p_s],
+    float **kernel,
     int p_sw,
-    double kernelk[p_sw][p_sw],
+    float **kernelk,
     int t_r,
     int s_r,
     int p_r,
     int sw,
-    double phi[M][N],
-    double PHI[M][N],
+    float **phi,
+    float **PHI,
     int s_s,
-    float w[s_s][s_s][m][n][c],
-    double lamda,
-    double f0[m][n][c])
+    float *****w,
+    float lamda,
+    float ***f0)
     {
-    int i,j,k,i0,j0,step;
-    double u [M][N][c];
+    int i,j,k,i0,j0,step,iii;
+    float ***u;
+
+    u = calloc(M, sizeof(float **));
+    for(i = 0; i < M; i++) { 
+       u[i] = calloc(N, sizeof(float *));
+        for(j = 0; j < N; j++) { 
+            u[i][j] = calloc(c, sizeof(float));
+        }
+    }
 
     initU(m,n,c,t_r,u0,u);
 
@@ -637,17 +749,38 @@ void solveNLCTV(
 
                     if(phi[i0][j0]<1)
                     {
-                        double sphi [2*p_r+1][2*p_r+1];
-                        subMatrix   (p_r,M,N,phi,i0,j0,sphi);
+                        float **sphi;
+                        sphi = calloc(2*p_r+1, sizeof(float *));
+                        for(iii = 0; iii < 2*p_r+1; iii++) {
+                            sphi[iii] = calloc(2*p_r+1, sizeof(float));
+                        }
+
+                        subMatrix(p_r,M,N,phi,i0,j0,sphi);
                         if(any(2*p_r+1,2*p_r+1,sphi)==1)
                         {
-                            double subw[s_s][s_s];
-                            double subu[s_s][s_s];
+                            float **subw;
+                            subw = calloc(s_s, sizeof(float *));
+                            for(iii = 0; iii < s_s; iii++) {
+                                subw[iii] = calloc(s_s, sizeof(float));
+                            }
+
+                            float **subu;
+                            subu = calloc(s_s, sizeof(float *));
+                            for(iii = 0; iii < s_s; iii++) {
+                                subu[iii] = calloc(s_s, sizeof(float));
+                            }
+
                             subWeight(m,n,c,s_s,w,i,j,k,subw);
                             subMatrix3D(s_r,M,N,c,k,u,i0,j0,subu);
-                            double prod[s_s][s_s];
+
+                            float **prod;
+                            prod = calloc(s_s, sizeof(float *));
+                            for(iii = 0; iii < s_s; iii++) {
+                                prod[iii] = calloc(s_s, sizeof(float));
+                            }
+
                             prodMatrix(s_s,s_s,subw,subu,prod);
-                            double sum_yw, sum_w;
+                            float sum_yw, sum_w;
                             sum_yw=sumMatrix(s_s,s_s,prod);
                             sum_w =sumMatrix(s_s,s_s,subw);
                             u0[i][j][k]=(lamda*PHI[i0][j0]*f0[i][j][k]+sum_yw)/(lamda*PHI[i0][j0]+sum_w);
@@ -694,32 +827,79 @@ void mexFunction(int numOut, mxArray *pmxOut[],
 
     int i,j,it,in4d,in2d,k,l,c_it,si,sj;
 
-    double u0[m][n][c];
-    double f0[m][n][c];
+    float ***u0;
+    u0 = calloc(m, sizeof(float **));
+    for(i = 0; i < m; i++) { 
+       u0[i] = calloc(n, sizeof(float *));
+        for(j = 0; j < n; j++) { 
+            u0[i][j] = calloc(c, sizeof(float));
+        }
+    }
+    float ***f0;
+    f0 = calloc(m, sizeof(float **));
+    for(i = 0; i < m; i++) { 
+       f0[i] = calloc(n, sizeof(float *));
+        for(j = 0; j < n; j++) { 
+            f0[i][j] = calloc(c, sizeof(float));
+        }
+    }
 
-    double kernel [p_s] [p_s];
-    double kernelk[p_sw][p_sw];
+    float **kernel;
+    kernel = calloc(p_s, sizeof(float *));
+    for(i = 0; i < p_s; i++) { 
+       kernel[i] = calloc(p_s, sizeof(float));
+    }
 
-    double phi[M][N], PHI[M][N];
+    float **kernelk;
+    kernelk = calloc(p_sw, sizeof(float *));
+    for(i = 0; i < p_sw; i++) { 
+       kernelk[i] = calloc(p_sw, sizeof(float));
+    }
+
+    float **phi, **PHI;
+    phi = calloc(M, sizeof(float *));
+    PHI = calloc(M, sizeof(float *));
+    for(i = 0; i < M; i++) { 
+        phi[i] = calloc(N, sizeof(float));
+        PHI[i] = calloc(N, sizeof(float));
+    }
 
     printfFnc("UTWORZENIE ZMIENNEJ WAGI: ");
-    float w[s_s][s_s][m][n][c];
-    for(si=0;si<s_s;si++)
-    {
-        for(sj=0;sj<s_s;sj++)
-        {
-            for(i=0;i<m;i++)
-            {
-                for(j=0;j<n;j++)
-                {
-                    for(k=0;k<c;k++)
-                    {
-                        w[si][sj][i][j][k]=0;
+    float *****w;
+    w = calloc(s_s, sizeof(float ****));
+    if(!w){
+        printfFnc("FAILED \n");
+        return;
+    }
+    for(si = 0; si < s_s; si++) { 
+        w[si] = calloc(s_s, sizeof(float ***));
+        if(!w[si]){
+            printfFnc("FAILED \n");
+            return;
+        }
+        for(sj = 0; sj < s_s; sj++) {
+            w[si][sj] = calloc(m, sizeof(float **));
+            if(!w[si][sj]){
+                printfFnc("FAILED \n");
+                return;
+            }
+            for(i = 0; i < m; i++) { 
+                w[si][sj][i] = calloc(n, sizeof(float *));
+                if(!w[si][sj][i]){
+                    printfFnc("FAILED \n");
+                    return;
+                }
+                for(j = 0; j < n; j++) { 
+                    w[si][sj][i][j] = calloc(c, sizeof(float));
+                    if(!w[si][sj][i][j]){
+                        printfFnc("FAILED \n");
+                        return;
                     }
                 }
             }
         }
     }
+
     printfFnc("OK \n");
     c_it=0;
     it  =0;
@@ -730,8 +910,8 @@ void mexFunction(int numOut, mxArray *pmxOut[],
             in2d=0;
             while(in2d<m*n)
             {
-                u0[in2d%m][in2d/m][c_it]=u0u[it];
-                f0[in2d%m][in2d/m][c_it]=f0u[it++];
+                u0[in2d%m][in2d/m][c_it] = (float)u0u[it];
+                f0[in2d%m][in2d/m][c_it] = (float)f0u[it++];
                 in2d++;
             }
         }
@@ -739,16 +919,16 @@ void mexFunction(int numOut, mxArray *pmxOut[],
     }
     for(i=0;i<p_s*p_s;i++)
     {
-        kernel[i%p_s][i/p_s] = kernelu[i];
+        kernel[i%p_s][i/p_s] = (float)kernelu[i];
     }
     for(i=0;i<p_sw*p_sw;i++)
     {
-        kernelk[i%p_s][i/p_s] = kernelku[i];
+        kernelk[i%p_s][i/p_s] = (float)kernelku[i];
     }
     for(i=0;i<M*N;i++)
     {
-        phi[i%M][i/M] = phiu[i];
-        PHI[i%M][i/M] = PHIu[i];
+        phi[i%M][i/M] = (float)phiu[i];
+        PHI[i%M][i/M] = (float)PHIu[i];
     }
 
     solveNLCTV(m,n,c,u0,M,N,h,p_s,kernel,p_sw,kernelk,t_r,
