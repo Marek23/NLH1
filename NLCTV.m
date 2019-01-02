@@ -1,45 +1,34 @@
 function NLCTV()
 
-images = dir('C:\MAREK\MAGISTERKA\Obrazy\msk\*.bmp');
-
-% for image=1:length(images)
-
 clc
-clearvars -except images image
 close all
 
-%% 
-%f0=imread(['C:\MAREK\MAGISTERKA\Obrazy\msk\' images(image).name]);
-f0=imread('Structurem2.bmp');
 %%
-% f0=imnoise(f0,'salt & pepper',0.3);
-% imwrite(uint8(f0),[ '..\ren1\q' num2str(1) '.bmp']);
-% f0=f(:,:,1);
+f0=imread('Structurem2.bmp');
 
 figure; imagesc(f0); colormap(gray); axis off; axis equal;
 f0=double(f0);
 
 [m,n,c]=size(f0);
-  
-p_r=3;
-s_r=5;
+
+p_r=2;      % =>patch
+s_r=4;      % =>search window
 p_s=p_r*2+1;
 s_s=s_r*2+1;
 t_r=p_r+s_r;
-c_r=4;
 
 BrokenAreaColor=255;
-sigma=5;h=100;
+sigma=1;h=50;
 
-kernel=fspecial('gaussian',p_s,sigma); %¸ßË¹ºËº¯Êý
+kernel=fspecial('gaussian',p_s,sigma);
 
 phi=double(1-((f0(:,:,1)==0) & ...
-            (f0(:,:,2)==BrokenAreaColor) & ...
-            (f0(:,:,3)==0)));
+              (f0(:,:,2)==BrokenAreaColor) & ...
+              (f0(:,:,3)==0)));
 
 phi=padarray(phi,[t_r t_r],'symmetric');
-PHI=phi;
-PHI_C=phi;
+PHI =phi;
+phi2=phi;
 
 u0=f0;
 
@@ -59,18 +48,9 @@ for step=1:5000
     
     if step>1
         
-        phi=1-((u(:,:,1)==0) & ...
-            (u(:,:,2)==BrokenAreaColor) & ...
-            (u(:,:,3)==0));
         w=updateWeight2(u0,u,h,kernel,t_r,s_r,p_r,phi,PHI,w);
         
     end
-    
-	if(sum(phi(:)) == size(phi,1)*size(phi,2))
-        break
-    end
-    
-    PHI_C=phi;
     
 	for i=1:m
         for j=1:n
@@ -78,68 +58,54 @@ for step=1:5000
             i0=i+t_r;
             j0=j+t_r;
                 
-            if sum(sum(phi(i0-p_r:i0+p_r,j0-p_r:j0+p_r)))>(p_r*p_s-1) && PHI_C(i0,j0)<1
+            if sum(sum(phi(i0-p_r:i0+p_r,j0-p_r:j0+p_r)))>(p_r*p_s-1) ...
+            && phi(i0,j0)==0
+            %%warunek 1 na minimaln¹ wartoœæ pikseli, które s¹ ju¿ wyznaczone
+            %%- ponad po³owa okna
+            %%warunek 2 na punkt piksela w masce
+                
+            max_ii=1;
+            max_jj=1;
+            for ii=1:s_s
+                for jj=1:s_s
                     
-                max_ii=1;
-                max_jj=1;
-                for ii=1:s_s
-                    for jj=1:s_s
-                        
-                        x1=w(ii,jj,i,j,1);
-                        x2=w(ii,jj,i,j,2);
-                        x3=w(ii,jj,i,j,3);
-                        
-                        m1=w(max_ii,max_jj,i,j,1);
-                        m2=w(max_ii,max_jj,i,j,2);
-                        m3=w(max_ii,max_jj,i,j,3);
-                        
-                        if(sumsqr([x1,x2,x3])...
-                          >sumsqr([m1,m2,m3]))
-                            max_ii=ii;
-                            max_jj=jj;
-                        end
-                    end
-                end
-                if(step==1)
-                    for iii=-c_r:c_r
-                        
-                        for jjj=-c_r:c_r
-                            
-                            if(PHI_C(i0+iii,j0+jjj)<1)
-                                u0(i+iii,j+jjj,:)=...
-                                    f0(i-(s_r+1)+max_ii+iii,j-(s_r+1)+max_jj+jjj,:);
-                                PHI_C(i0+iii,j0+jjj,:)=1;
-                            end
-                            
-                        end
-                    end
-                else
-                    for iii=-c_r:c_r
-                        
-                        for jjj=-c_r:c_r
-                            
-                            if(PHI_C(i0+iii,j0+jjj)<1)
-                                u0(i+iii,j+jjj,:)=...
-                                    u0(i-(s_r+1)+max_ii+iii,j-(s_r+1)+max_jj+jjj,:);
-                                PHI_C(i0+iii,j0+jjj,:)=1;
-                            end
-                            
-                        end
+                    x1=w(ii,jj,i,j,1);
+                    x2=w(ii,jj,i,j,2);
+                    x3=w(ii,jj,i,j,3);
+                    
+                    m1=w(max_ii,max_jj,i,j,1);
+                    m2=w(max_ii,max_jj,i,j,2);
+                    m3=w(max_ii,max_jj,i,j,3);
+                    
+                    if(sumsqr([x1,x2,x3])...
+                      >sumsqr([m1,m2,m3])...
+                      && all(x1)...
+                      && all(x2)...
+                      && all(x3))
+                        max_ii=ii;
+                        max_jj=jj;
                     end
                 end
             end
-              
+            
+            u0(i,j,:)=u0(i-(s_r+1)+max_ii,j-(s_r+1)+max_jj,:);
+            phi2(i0,j0,:)=1;
+            
+        end
+        
         end %end for j
 	end %end for i
 
+    phi = phi2;
     
-%     if mod(step,10)==0
-        
-%         imwrite(uint8(u0),['C:\MAREK\MAGISTERKA\Obrazy\test\' 'step' num2str(step) images(image).name]);
-        figure; imagesc(uint8(u0)); colormap(gray); axis off; axis equal;
-        pause(1)
-        
-%     end
+%   imwrite(uint8(u0),['C:\MAREK\MAGISTERKA\Obrazy\test\' 'step' num2str(step) images(image).name]);
+	figure; imagesc(uint8(u0)); colormap(gray); axis off; axis equal;
+	pause(1)
+
+	if(sum(phi(:)) == size(phi,1)*size(phi,2))
+        break
+    end
+
     toc
     
 end
