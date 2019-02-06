@@ -272,7 +272,6 @@ void initU(
     float ***in,
     float ***new_in)
     {
-    printfFnc("INICJALIZACJA U \n");
     int new_m = m+(2*t_r);
     int new_n = n+(2*t_r);
 
@@ -504,7 +503,6 @@ void updateWeight(
     int s_s,
     float *****w)
     {
-    printfFnc("PIERWSZE OBLICZENIE WAGI \n");
 
     int i, j, k, r, s, i0, j0, ii, jj, iii;
 
@@ -587,7 +585,6 @@ void updateWeight2(
     int s_s,
     float *****w)
     {
-    printfFnc("AKTUALIZACJA WAGI \n");
 
     int i, j, k, r, s, i0, j0, ii, jj, iii, jjj;
 
@@ -740,7 +737,6 @@ void solveNLCTV(
 
         if (allOne(M,N,phi)==1)
         {
-            printfFnc("Koniec step: %d", step);
             clearVars(p_r,k_r,s_s);
 
             for(i = 0; i < M; i++) { 
@@ -819,7 +815,6 @@ void mexFunction(int numOut, mxArray *pmxOut[],
         PHI[i] = calloc(N, sizeof(float));
     }
 
-    printfFnc("UTWORZENIE ZMIENNEJ WAGI: ");
     float *****w;
     w = calloc(s_s, sizeof(float ****));
     if(!w){
@@ -855,7 +850,6 @@ void mexFunction(int numOut, mxArray *pmxOut[],
         }
     }
 
-    printfFnc("OK \n");
     c_it=0;
     it  =0;
     while(c_it<c)
