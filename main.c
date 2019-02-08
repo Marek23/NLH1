@@ -17,6 +17,7 @@ void initVars(int p_r, int k_r, int s_s) {
     W2   = calloc(2*p_r+1, sizeof(float *));
     diff = calloc(2*p_r+1, sizeof(float *));
     ret  = calloc(2*p_r+1, sizeof(float *));
+
     for(iii = 0; iii < 2*p_r+1; iii++) {
         sphi[iii] = calloc(2*p_r+1, sizeof(float));
         W1[iii]   = calloc(2*p_r+1, sizeof(float));
@@ -400,6 +401,14 @@ float sumMatrix(
     return sum;
     }
 
+float sumsqr(
+    float a,
+    float b,
+    float c)
+    {
+    return sqrt(a*a + b*b + c*c);
+    }
+
 int any(
     int m,
     int n,
@@ -430,6 +439,25 @@ int allOne(
         for(j=0;j<n;j++)
         {
             if(in[i][j]<1)
+            {
+                return 0;
+            }
+        }
+    }
+    return 1;
+    }
+
+int allNonZero(
+    int m,
+    int n,
+    float **in)
+    {
+    int i,j;
+    for(i=0;i<m;i++)
+    {
+        for(j=0;j<n;j++)
+        {
+            if(in[i][j] > 0)
             {
                 return 0;
             }
@@ -507,25 +535,24 @@ void updateWeight(
     printfFnc("PIERWSZE OBLICZENIE WAGI \n");
 
     int i, j, k, r, s, i0, j0, ii, jj, iii;
-
+    
     for(i=0;i<m;i++)
     {
         for(j=0;j<n;j++)
         {
+
             for(k=0;k<c;k++)
             {
                 i0=i+t_r;
                 j0=j+t_r;
 
-                subMatrix   (p_r,M,N,phi,i0,j0,sphi);
-                subMatrix   (k_r,M,N,phi,i0,j0,sphik);
-
+                subMatrix(p_r,M,N,phi,i0,j0,sphi);
+                subMatrix(k_r,M,N,phi,i0,j0,sphik);
                 if(any(2*p_r+1,2*p_r+1,sphi) == 1)
                 {
-
+                    
                     subMatrix3D(p_r,M,N,c,k,u,i0,j0,W1);
                     subMatrix3D(k_r,M,N,c,k,u,i0,j0,W1k);
-
                     ii=0;
                     for(r=i0-s_r;r<=i0+s_r;r++)
                     {
@@ -542,6 +569,7 @@ void updateWeight(
 
                                 prod3Matrix(2*p_r+1,2*p_r+1,sphi ,kernel ,diff ,ret);
                                 prod3Matrix(2*k_r+1,2*k_r+1,sphik,kernelk,diffk,retk);
+
                                 if (sw!=1)
                                 {
                                     w[ii][jj][i][j][k]=
@@ -550,8 +578,10 @@ void updateWeight(
                                 }
                                 else
                                 {
+
                                     w[ii][jj][i][j][k]=
                                         exp((-1.0)*sumMatrix(2*p_r+1,2*p_r+1,ret )/(h*h));
+                                    
                                 }
                             }
                             jj++;
@@ -673,8 +703,12 @@ void solveNLCTV(
     float lamda,
     float ***f0)
     {
-    int i,j,k,i0,j0,step,iii;
+    int i,j,k,i0,j0,step,iii,ii,jj;
     float ***u;
+
+    int last_count;
+
+    float x1,x2,x3,m1,m2,m3;
 
     int k_r=sw*p_r;
 
@@ -689,6 +723,19 @@ void solveNLCTV(
     initU(m,n,c,t_r,u0,u);
     initVars(p_r,k_r,s_s);
 
+    float **phi2;
+    phi2 = calloc(M, sizeof(float *));
+    for(i0 = 0; i0 < M; i0++) { 
+       phi2[i0] = calloc(N, sizeof(float));
+    }
+
+    for(i = 0; i < M; i++) {
+        for(j = 0; j < N; j++) {
+            phi2[i][j]=phi[i][j];
+        }
+    }
+
+    last_count = sumMatrix(M,N,phi);
     for(step=1;step<99999;step++)
     {
         padarray3d(m,n,c,t_r,u0,u);
@@ -697,48 +744,71 @@ void solveNLCTV(
             updateWeight(m,n,c,u0,M,N,u,h,p_s,kernel,
                 p_sw,kernelk,t_r,s_r,p_r,k_r,sw,phi,s_s,w);
         }
-        if(step>9 && step%10==0)
+        else
         {
-            printfFnc("Step: %d \n", step);
-            updatePhi(M,N,c,u,phi);
             updateWeight2(m,n,c,u0,M,N,u,h,p_s,kernel,
                 p_sw,kernelk,t_r,s_r,p_r,k_r,sw,phi,PHI,s_s,w);
         }
+        
         for(i=0;i<m;i++)
         {
+
             for(j=0;j<n;j++)
             {
-                for(k=0;k<c;k++)
-                {
-                    i0=i+t_r;
-                    j0=j+t_r;
 
-                    if(phi[i0][j0]<1)
+                i0=i+t_r;
+                j0=j+t_r;
+                subMatrix(p_r,M,N,phi,i0,j0,sphi);
+                if(phi[i0][j0]<1
+                && sumMatrix(s_s,s_s,sphi) > p_r*(p_s-1))
+                {
+                    int max_ii=0;
+                    int max_jj=0;
+                    m1=w[max_ii][max_jj][i][j][0];
+                    m2=w[max_ii][max_jj][i][j][1];
+                    m3=w[max_ii][max_jj][i][j][2];
+                    for(ii=0;ii<s_s;ii++)
                     {
 
-                        subMatrix(p_r,M,N,phi,i0,j0,sphi);
-                        if(any(2*p_r+1,2*p_r+1,sphi)==1)
+                        for(jj=0;jj<s_s;jj++)
                         {
+                            x1=w[ii][jj][i][j][0];
+                            x2=w[ii][jj][i][j][1];
+                            x3=w[ii][jj][i][j][2];
 
-                            subWeight(m,n,c,s_s,w,i,j,k,subw);
-                            subMatrix3D(s_r,M,N,c,k,u,i0,j0,subu);
-
-                            prodMatrix(s_s,s_s,subw,subu,prod);
-                            float sum_yw, sum_w;
-                            sum_yw=sumMatrix(s_s,s_s,prod);
-                            sum_w =sumMatrix(s_s,s_s,subw);
-                            u0[i][j][k]=(lamda*PHI[i0][j0]*f0[i][j][k]+sum_yw)/(lamda*PHI[i0][j0]+sum_w);
-                        }
-                        else
-                        {
-                            u0[i][j][k]=u0[i][j][k];
+                            if (sumsqr(x1,x2,x3) > sumsqr(m1,m2,m3)
+                            && phi[i0-s_r+ii][j0-s_r+jj]>0)
+                            {
+                                max_ii=ii;
+                                max_jj=jj;
+                                m1=w[max_ii][max_jj][i][j][0];
+                                m2=w[max_ii][max_jj][i][j][1];
+                                m3=w[max_ii][max_jj][i][j][2];
+                            }
                         }
                     }
+
+                    if(phi[i0-s_r+max_ii][j0-s_r+max_jj]>0)
+                    {
+                        
+                        u0[i][j][0] =u[i0-s_r+max_ii][j0-s_r+max_jj][0];
+                        u0[i][j][1] =u[i0-s_r+max_ii][j0-s_r+max_jj][1];
+                        u0[i][j][2] =u[i0-s_r+max_ii][j0-s_r+max_jj][2];
+                        phi2[i0][j0]=1;
+
+                    }
+
                 }
             }
         }
 
-        if (allOne(M,N,phi)==1)
+        for(i = 0; i < M; i++) { 
+            for(j = 0; j < N; j++) {
+                phi[i][j]=phi2[i][j];
+            }
+        }
+
+        if (allOne(M,N,phi)==1 || sumMatrix(M,N,phi) == last_count)
         {
             printfFnc("Koniec step: %d", step);
             clearVars(p_r,k_r,s_s);
@@ -751,8 +821,13 @@ void solveNLCTV(
             }
             free(u);
 
+            for(i = 0; i < M; i++)
+                free(phi2[i]);
+            free(phi2);
+
             break;
         }
+        last_count = sumMatrix(M,N,phi);
     }
     }
 
