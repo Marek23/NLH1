@@ -3,8 +3,6 @@
 #include <math.h>
 #include "mex.h"
 
-int mexAtExit(void (*ExitFcn)(void));
-
 #define printfFnc(...) { mexPrintf(__VA_ARGS__); mexEvalString("drawnow;");}
 
 float **sphi,  **W1,  **W2,  **diff,  **ret,  **kernel;  // p_s x p_s
