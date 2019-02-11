@@ -1,27 +1,36 @@
 function NLCTV()
+
 clc; clear;
+
+setenv('MW_MINGW64_LOC','C:\TDM-GCC-64')
+
 mex main.c;
 
-images = dir('C:\MAREK\MAGISTERKA\Obrazy\imgmask\*.png');
+images = dir('C:\Users\Pawe³\Desktop\Marek\imgmask\*.png');
 
 for image=1:length(images)
 
-h=7;
-while h<9
+h =7;
 
-s_r = 1;
-while s_r <9
+while h<11
+
+s_r = 3;
+while s_r <13
+s_r
 
 p_r = 1;
-while p_r < s_r && p_r <7
+while p_r < s_r && p_r <9
+p_r
 
-sw =1; %%mï¿½j parametr(gdy =1 ==> oryginalny algorytm)
+sw =1; %%mój parametr(gdy =1 ==> oryginalny algorytm)
 while sw < 5
+sw
 
 clearvars -except image images h s_r p_r sw
-tic
 
-f0=imread(['C:\MAREK\MAGISTERKA\Obrazy\imgmask\' images(image).name]);
+
+
+f0=imread(['C:\Users\Pawe³\Desktop\Marek\imgmask\' images(image).name]);
 
 %figure; imagesc(f0); colormap(gray); axis off; axis equal;
 f0=double(f0);
@@ -48,17 +57,20 @@ phi=padarray(phi,[t_r t_r],'symmetric');
 PHI=phi;
 
 u0=f0;
-   
+
+tic
+
 u0r = main(m,n,c,u0(:),...
     m+2*t_r,n+2*t_r,h,p_s,kernel(:),...
     t_s,kernelk(:),t_r,s_r,p_r,sw,phi(:),...
     PHI(:),s_s,lamda,f0(:));
 
+t = toc;
+
 u0 = reshape(u0r,[m,n,c]);
 %figure; imagesc(uint8(u0)); colormap(gray); axis off; axis equal;
 
-t = toc;
-imwrite(uint8(u0),['C:\MAREK\MAGISTERKA\Obrazy\nlctvcriminisitest\' 'sw_' num2str(sw) 'h_' num2str(h) 'pr_' num2str(p_r) 'sr_' num2str(s_r) 't' num2str(t) images(image).name]);
+imwrite(uint8(u0),['C:\Users\Pawe³\Desktop\Marek\nlctvtest\' images(image).name 's_r_' num2str(s_r) 'p_r' num2str(p_r) 'h_' num2str(h) 'sw_' num2str(sw) 't_' num2str(t) '.png']);
 
 sw=sw+1;
 end
