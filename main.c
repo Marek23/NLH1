@@ -3,6 +3,8 @@
 #include <math.h>
 #include "mex.h"
 
+int mexAtExit(void (*ExitFcn)(void));
+
 #define printfFnc(...) { mexPrintf(__VA_ARGS__); mexEvalString("drawnow;");}
 
 float **sphi,  **W1,  **W2,  **diff,  **ret;
@@ -98,7 +100,7 @@ void showMatrix2D(
     {
         for(j=0;j<n;j++)
         {
-            printf("%.1f ", w[i][j]);
+            printfFnc("%.1f ", w[i][j]);
         }
     printf("\n");
     }
@@ -691,15 +693,19 @@ void solveNLCTV(
         padarray3d(m,n,c,t_r,u0,u);
         if(step==1)
         {
+            printfFnc("Pierwsze obliczenie wagi: ");
             updateWeight(m,n,c,u0,M,N,u,h,p_s,kernel,
                 p_sw,kernelk,t_r,s_r,p_r,k_r,sw,phi,s_s,w);
+            printfFnc("OK. \n");
         }
         if(step>9 && step%10==0)
         {
             printfFnc("Step: %d \n", step);
             updatePhi(M,N,c,u,phi);
+
             updateWeight2(m,n,c,u0,M,N,u,h,p_s,kernel,
                 p_sw,kernelk,t_r,s_r,p_r,k_r,sw,phi,PHI,s_s,w);
+            printfFnc("OK. \n");
         }
         for(i=0;i<m;i++)
         {
@@ -715,6 +721,7 @@ void solveNLCTV(
 
                         subMatrix(p_r,M,N,phi,i0,j0,sphi);
                         if(any(2*p_r+1,2*p_r+1,sphi)==1)
+
                         {
 
                             subWeight(m,n,c,s_s,w,i,j,k,subw);
@@ -883,7 +890,7 @@ void mexFunction(int numOut, mxArray *pmxOut[],
     solveNLCTV(m,n,c,u0,M,N,h,p_s,kernel,p_sw,kernelk,t_r,
                s_r,p_r,sw,phi,PHI,s_s,w,lamda,f0);
 
-    pmxOut[0] = mxCreateDoubleMatrix(1,m*n*c,mxREAL);
+    pmxOut[0] = mxCreateDoubleMatrix(1,m*n,mxREAL);
     double *ret1;
     ret1 = mxGetPr(pmxOut[0]);
 
