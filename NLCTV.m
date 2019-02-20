@@ -9,20 +9,16 @@ images = dir('C:\MAREK\MAGISTERKA\Obrazy\imgmask\*.png');
 for image=1:length(images)
 
 h =1;
-
-while h<5
+while h<8
 
 s_r = 3;
-while s_r <13
-s_r
+while s_r <17
 
 p_r = 1;
-while p_r < s_r && p_r <9
-p_r
+while p_r < s_r && p_r <13
 
 sw =2; %%mój parametr(gdy =1 ==> oryginalny algorytm)
-while sw < 5
-sw
+while sw <= 5
 
 clearvars -except image images h s_r p_r sw
 
@@ -40,7 +36,7 @@ P_R = p_r*sw+1;
 P_S = 2*P_R+1;
 t_r = P_R+s_r;
 M   = m+2*t_r;
-N   = m+2*t_r;
+N   = n+2*t_r;
 
 BrokenAreaColor=240;
 
@@ -59,12 +55,10 @@ PHI=phi;
 u0=f0;
 
 tic
-
 u0r = main(m,n,c,u0(:),...
     M,N,h,p_s,kernel(:),...
     P_S,kernelk(:),t_r,s_r,p_r,sw,phi(:),...
     PHI(:),s_s,lamda,f0(:));
-
 t = toc;
 
 u0 = reshape(u0r,[m,n,c]);
@@ -83,7 +77,5 @@ end
 
 h=h+1;
 end
-
-
 
 end
