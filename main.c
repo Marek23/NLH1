@@ -3,6 +3,8 @@
 #include <math.h>
 #include "mex.h"
 
+int mexAtExit(void (*ExitFcn)(void));
+
 #define printfFnc(...) { mexPrintf(__VA_ARGS__); mexEvalString("drawnow;");}
 
 float **sphi,  **W1,  **W2,  **diff,  **ret;
@@ -99,7 +101,7 @@ void showMatrix2D(
     {
         for(j=0;j<n;j++)
         {
-            printf("%.1f ", w[i][j]);
+            printfFnc("%.1f ", w[i][j]);
         }
     printf("\n");
     }
@@ -733,48 +735,56 @@ void solveNLCTV(
     }
 
     last_count = sumMatrix(M,N,phi);
+    printfFnc("INPAINTING \n");
     for(step=1;step<99999;step++)
     {
         padarray3d(m,n,c,t_r,u0,u);
         if(step==1)
         {
+            printfFnc("Pierwsze obliczenie wagi: ");
             updateWeight(m,n,c,u0,M,N,u,h,p_s,kernel,
                 p_sw,kernelk,t_r,s_r,p_r,k_r,sw,phi,s_s,w);
+            printfFnc("OK. \n");
         }
         else
         {
+            printfFnc("Kolejne obliczenie wagi: ");
             updateWeight2(m,n,c,u0,M,N,u,h,p_s,kernel,
                 p_sw,kernelk,t_r,s_r,p_r,k_r,sw,phi,PHI,s_s,w);
+            printfFnc("OK. \n");
         }
         
         for(i=0;i<m;i++)
         {
-
             for(j=0;j<n;j++)
             {
-
                 i0=i+t_r;
                 j0=j+t_r;
+
                 subMatrix(p_r,M,N,phi,i0,j0,sphi);
+
                 if(phi[i0][j0]<1
-                && sumMatrix(s_s,s_s,sphi) > p_r*(p_s-1))
+                && sumMatrix(p_s,p_s,sphi) > p_r*(p_s-1))
                 {
                     int max_ii=0;
                     int max_jj=0;
                     m1=w[max_ii][max_jj][i][j][0];
                     m2=w[max_ii][max_jj][i][j][1];
                     m3=w[max_ii][max_jj][i][j][2];
+
                     for(ii=0;ii<s_s;ii++)
                     {
-
+                        
                         for(jj=0;jj<s_s;jj++)
                         {
                             x1=w[ii][jj][i][j][0];
                             x2=w[ii][jj][i][j][1];
                             x3=w[ii][jj][i][j][2];
 
-                            if (sumsqr(x1,x2,x3) > sumsqr(m1,m2,m3)
-                            && phi[i0-s_r+ii][j0-s_r+jj]>0)
+                            if(i0-s_r+max_ii < M && i0-s_r+max_ii > -1 
+                            && j0-s_r+max_jj < N && j0-s_r+max_jj > -1
+                            && phi[i0-s_r+ii][j0-s_r+jj]>0
+                            && sumsqr(x1,x2,x3) > sumsqr(m1,m2,m3))
                             {
                                 max_ii=ii;
                                 max_jj=jj;
@@ -784,8 +794,9 @@ void solveNLCTV(
                             }
                         }
                     }
-
-                    if(phi[i0-s_r+max_ii][j0-s_r+max_jj]>0)
+                    if(i0-s_r+max_ii < M && i0-s_r+max_ii > -1 
+                    && j0-s_r+max_jj < N && j0-s_r+max_jj > -1
+                    && phi[i0-s_r+max_ii][j0-s_r+max_jj]>0)
                     {
                         
                         u0[i][j][0] =u[i0-s_r+max_ii][j0-s_r+max_jj][0];
@@ -958,7 +969,7 @@ void mexFunction(int numOut, mxArray *pmxOut[],
     solveNLCTV(m,n,c,u0,M,N,h,p_s,kernel,p_sw,kernelk,t_r,
                s_r,p_r,sw,phi,PHI,s_s,w,lamda,f0);
 
-    pmxOut[0] = mxCreateDoubleMatrix(1,m*n*c,mxREAL);
+    pmxOut[0] = mxCreateDoubleMatrix(1,m*n,mxREAL);
     double *ret1;
     ret1 = mxGetPr(pmxOut[0]);
 

@@ -6,16 +6,17 @@ images = dir('C:\MAREK\MAGISTERKA\Obrazy\imgmask\*.png');
 
 for image=1:length(images)
 
-sw =1; %%mój parametr(gdy =1 ==> oryginalny algorytm)
-
 h=7;
-while h<8
+while h<9
 
 s_r = 1;
-while s_r <22
+while s_r <9
 
 p_r = 1;
-while p_r <= s_r && p_r <16
+while p_r < s_r && p_r <7
+
+sw =1; %%mój parametr(gdy =1 ==> oryginalny algorytm)
+while sw < 5
 
 clearvars -except image images h s_r p_r sw
 tic
@@ -33,7 +34,6 @@ s_s =s_r*2+1;
 t_r =p_r*sw+s_r;
 
 BrokenAreaColor=240;
-
 
 lamda=.01;sigma=5; %%parametry jak poprzednio
 
@@ -57,16 +57,11 @@ u0r = main(m,n,c,u0(:),...
 u0 = reshape(u0r,[m,n,c]);
 %figure; imagesc(uint8(u0)); colormap(gray); axis off; axis equal;
 
-imwrite(uint8(u0),['C:\MAREK\MAGISTERKA\Obrazy\nlctvtest\' 'h' num2str(h) 'ps' num2str(p_r) 'sw' num2str(s_r) images(image).name]);
+t = toc;
+imwrite(uint8(u0),['C:\MAREK\MAGISTERKA\Obrazy\nlctvcriminisitest\' 'sw_' num2str(sw) 'h_' num2str(h) 'pr_' num2str(p_r) 'sr_' num2str(s_r) 't' num2str(t) images(image).name]);
 
-images(image).name
-toc
-
-DiaryName = strcat('C:\MAREK\MAGISTERKA\Obrazy\nlctvtest\','h',num2str(h),'ps',num2str(p_r),'sw',num2str(s_r),images(image).name,'.log');
-diary(DiaryName)
-diary on
-
-clc
+sw=sw+1;
+end
 
 p_r=p_r+2;
 end
@@ -76,5 +71,7 @@ end
 
 h=h+1;
 end
+
+
 
 end
