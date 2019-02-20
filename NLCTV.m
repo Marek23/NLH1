@@ -2,11 +2,9 @@ function NLCTV()
 
 clc; clear;
 
-setenv('MW_MINGW64_LOC','C:\TDM-GCC-64')
-
 mex main.c;
 
-images = dir('C:\Users\Pawe�\Desktop\Marek\imgmask\*.png');
+images = dir('C:\MAREK\MAGISTERKA\Obrazy\imgmask\*.png');
 
 for image=1:length(images)
 
@@ -28,9 +26,9 @@ sw
 
 clearvars -except image images h s_r p_r sw
 
+images(image).name
 
-
-f0=imread(['C:\Users\Pawe�\Desktop\Marek\imgmask\' images(image).name]);
+f0=imread(['C:\MAREK\MAGISTERKA\Obrazy\imgmask\' images(image).name]);
 
 %figure; imagesc(f0); colormap(gray); axis off; axis equal;
 f0=double(f0);
@@ -72,7 +70,7 @@ t = toc;
 u0 = reshape(u0r,[m,n,c]);
 %figure; imagesc(uint8(u0)); colormap(gray); axis off; axis equal;
 
-imwrite(uint8(u0),['C:\Users\Pawe�\Desktop\Marek\nlctvWeigtEditCrimMet\' images(image).name 's_r_' num2str(s_r) 'p_r' num2str(p_r) 'h_' num2str(h) 'sw_' num2str(sw) 't_' num2str(t) '.png']);
+imwrite(uint8(u0),['C:\MAREK\MAGISTERKA\Obrazy\nlctvWeigtEditCrimMet\' images(image).name 's_r_' num2str(s_r) 'p_r' num2str(p_r) 'h_' num2str(h) 'sw_' num2str(sw) 't_' num2str(t) '.png']);
 
 sw=sw+1;
 end
