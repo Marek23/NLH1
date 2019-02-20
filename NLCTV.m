@@ -15,7 +15,7 @@ while s_r <9
 p_r = 1;
 while p_r < s_r && p_r <7
 
-sw =1; %%mój parametr(gdy =1 ==> oryginalny algorytm)
+sw =1; %%mï¿½j parametr(gdy =1 ==> oryginalny algorytm)
 while sw < 5
 
 clearvars -except image images h s_r p_r sw
@@ -29,16 +29,16 @@ f0=double(f0);
 
 
 p_s =p_r*2+1;
-p_sw=p_r*2*sw+1;
 s_s =s_r*2+1;
 t_r =p_r*sw+s_r;
+t_s =t_s*sw+s_r;
 
 BrokenAreaColor=240;
 
 lamda=.01;sigma=5; %%parametry jak poprzednio
 
 kernel= fspecial('gaussian',p_s,sigma);
-kernelk=fspecial('gaussian',p_sw,sigma);
+kernelk=fspecial('gaussian',t_s,sigma);
 
 phi=double(1-((f0(:,:,1) < 10) & ...
               (f0(:,:,2) >BrokenAreaColor) & ...
@@ -51,7 +51,7 @@ u0=f0;
    
 u0r = main(m,n,c,u0(:),...
     m+2*t_r,n+2*t_r,h,p_s,kernel(:),...
-    p_sw,kernelk(:),t_r,s_r,p_r,sw,phi(:),...
+    t_s,kernelk(:),t_r,s_r,p_r,sw,phi(:),...
     PHI(:),s_s,lamda,f0(:));
 
 u0 = reshape(u0r,[m,n,c]);
