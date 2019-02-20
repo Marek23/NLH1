@@ -214,6 +214,7 @@ void clearVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
         free(w[si]);
     }
     free(w);
+
 }
 
 void showMatrix2D(
@@ -801,9 +802,10 @@ void solveNLCTV(
     float lamda,
     float ***f0)
     {
-    int i,j,k,i0,j0,step,iii,ii,jj;
 
-    int last_count;
+    int i,j,k,i0,j0,iii,ii,jj;
+
+    int last_count, step, done;
 
     float x1,x2,x3,m1,m2,m3;
 
@@ -814,11 +816,12 @@ void solveNLCTV(
             phi2[i][j]=phi[i][j];
         }
     }
-    printfFnc("Przepisanie phi do phi2 \n");
 
     last_count = sumMatrix(M,N,phi);
     printfFnc("INPAINTING \n");
-    for(step=1;step<99999;step++)
+    step =  1;
+    done = -1;
+    while(step < 99999 && done != 1)
     {
         padarray3d(m,n,c,t_r,u0,u);
         if(step==1)
@@ -830,10 +833,8 @@ void solveNLCTV(
         }
         else
         {
-            printfFnc("Kolejne obliczenie wagi: ");
             updateWeight2(m,n,c,M,N,u,h,p_s,kernel,
                 P_S,kernelk,t_r,s_r,p_r,k_r,sw,phi,PHI,s_s,w);
-            printfFnc("OK. \n");
         }
         
         for(i=0;i<m;i++)
@@ -898,9 +899,12 @@ void solveNLCTV(
 
         if (allOne(M,N,phi)==1 || sumMatrix(M,N,phi) == last_count)
         {
-            break;
+            printfFnc("DONE");
+            done = 1;
+        } else {
+            last_count = sumMatrix(M,N,phi);
+            step++;
         }
-        last_count = sumMatrix(M,N,phi);
     }
     }
 
@@ -930,16 +934,11 @@ void mexFunction(int numOut, mxArray *pmxOut[],
 
     int i,j,i0,j0,it,in4d,in2d,k,l,c_it,si,sj;
 
-    printfFnc("P_S %d p_s %d ", P_S, p_s);
     
-    printfFnc("Inicjalizacja zmiennych: ");
     initVars(p_s,P_S,s_s,M,N,m,n,c);
-    printfFnc("OK. \n");
 
-    printfFnc("Przepisanie wartości: ");
     c_it = 0;
     it   = 0;
-    printfFnc("Piksele: %d \n", m*n*c);
     while(c_it<c)
     {
         while(it<(c_it+1)*m*n)
@@ -947,7 +946,6 @@ void mexFunction(int numOut, mxArray *pmxOut[],
             in2d=0;
             while(in2d<m*n)
             {
-                printfFnc("Iter: %d \n", it);
                 u0[in2d%m][in2d/m][c_it] = (float)u0u[it];
                 f0[in2d%m][in2d/m][c_it] = (float)f0u[it++];
                 in2d++;
@@ -972,21 +970,22 @@ void mexFunction(int numOut, mxArray *pmxOut[],
     {
         kernel[i%p_s][i/p_s] = (float)kernelu[i];
     }
+
     for(i=0;i<P_S*P_S;i++)
     {
         kernelk[i%P_S][i/P_S] = (float)kernelku[i];
     }
+
     for(i=0;i<M*N;i++)
     {
         phi[i%M][i/M] = (float)phiu[i];
         PHI[i%M][i/M] = (float)PHIu[i];
     }
-    printfFnc("OK. \n");
 
     solveNLCTV(m,n,c,u0,M,N,h,p_s,kernel,P_S,kernelk,t_r,
                s_r,p_r,sw,phi,PHI,s_s,w,lamda,f0);
 
-    pmxOut[0] = mxCreateDoubleMatrix(1,m*n,mxREAL);
+    pmxOut[0] = mxCreateDoubleMatrix(1,m*n*c,mxREAL);
     double *ret1;
     ret1 = mxGetPr(pmxOut[0]);
 
