@@ -24,7 +24,8 @@ clearvars -except image images h s_r p_r sw
 
 images(image).name
 
-f0=imread(['C:\MAREK\MAGISTERKA\Obrazy\imgmask\' images(image).name]);
+%f0=imread(['C:\MAREK\MAGISTERKA\Obrazy\imgmask\' images(image).name]);
+f0=imread(['C:\MAREK\MAGISTERKA\Obrazy\imgmask\' 'tmp.png']);
 
 %figure; imagesc(f0); colormap(gray); axis off; axis equal;
 f0=double(f0);
@@ -64,8 +65,8 @@ t = toc;
 u0 = reshape(u0r,[m,n,c]);
 %figure; imagesc(uint8(u0)); colormap(gray); axis off; axis equal;
 
-imwrite(uint8(u0),['C:\MAREK\MAGISTERKA\Obrazy\nlctvWeigtEditCrimMet\' images(image).name 's_r_' num2str(s_r) 'p_r' num2str(p_r) 'h_' num2str(h) 'sw_' num2str(sw) 't_' num2str(t) '.png']);
-
+%imwrite(uint8(u0),['C:\MAREK\MAGISTERKA\Obrazy\ltest\' images(image).name 's_r_' num2str(s_r) 'p_r' num2str(p_r) 'h_' num2str(h) 'sw_' num2str(sw) 't_' num2str(t) '.png']);
+imwrite(uint8(u0),['C:\MAREK\MAGISTERKA\Obrazy\ltest\' 'tmp.png' 's_r_' num2str(s_r) 'p_r' num2str(p_r) 'h_' num2str(h) 'sw_' num2str(sw) 't_' num2str(t) '.png']);
 sw=sw+1;
 end
 

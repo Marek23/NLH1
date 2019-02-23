@@ -8,15 +8,15 @@
 float **sphi,  **W1,  **W2,  **diff,  **ret,  **kernel;  // p_s x p_s
 float **sphik, **W1k, **W2k, **diffk, **retk, **kernelk; // P_S x P_S
 
-float **subw, **subu, **prod;                 // s_s x s_s
+float **subw, **subu, **prod;                            // s_s x s_s
 
-float **phi2, **phi, **PHI;                   // M x N
+float **phi, **PHI;                                      // M x N
 
-float ***u;                                   // M x N x c
+float ***u;                                              // M x N x c
 
-float ***u0, ***f0;                           // m x n x c
+float ***u0, ***f0;                                      // m x n x c
 
-float *****w;                                 // s_s x s_s x m x n
+float *****w;                                            // s_s x s_s x m x n
 
 void initVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
     int iii, jjj, si, sj;
@@ -59,11 +59,9 @@ void initVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
         prod[iii] = calloc(s_s, sizeof(float));
     }
 
-    phi2 = calloc(M, sizeof(float *));
     phi  = calloc(M, sizeof(float *));
     PHI  = calloc(M, sizeof(float *));
     for(iii = 0; iii < M; iii++) {
-       phi2[iii] = calloc(N, sizeof(float));
        phi[iii]  = calloc(N, sizeof(float));
        PHI[iii]  = calloc(N, sizeof(float));
     }
@@ -171,11 +169,9 @@ void clearVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
 
     // float **phi2, **phi, **PHI;                   // M x N
     for(iii = 0; iii < M; iii++) {
-        free(phi2[iii]);
         free(phi[iii]);
         free(PHI[iii]);
     }
-    free(phi2);
     free(phi);
     free(PHI);
 
@@ -775,17 +771,16 @@ void solveNLCTV(
     {
     int i,j,k,i0,j0,iii,ii,jj;
 
-    int last_count, step, done;
+    int step, done;
+
+    float last_count;
 
     int k_r=sw*p_r;
 
-    initU(m,n,c,t_r,u0,u);
-    initVars(p_s,P_S,s_s,M,N,m,n,c);
-
-    last_count = sumMatrix(M,N,phi);
-    printfFnc("INPAINTING \n");
+    last_count = -1.0;
     step =  1;
     done = -1;
+    printfFnc("INPAINTING \n");
     while(step < 99999 && done != 1)
     {
         padarray3d(m,n,c,t_r,u0,u);
@@ -802,6 +797,15 @@ void solveNLCTV(
             updatePhi(M,N,c,u,phi);
             updateWeight2(m,n,c,M,N,u,h,p_s,kernel,
                 P_S,kernelk,t_r,s_r,p_r,k_r,sw,phi,PHI,s_s,w);
+            
+            if (allOne(M,N,phi) == 1
+            || last_count == sumMatrix(M,N,phi))
+            {
+                printfFnc("DONE");
+                done = 1;
+            } else {
+                last_count = sumMatrix(M,N,phi);
+            }
         }
         for(i=0;i<m;i++)
         {
@@ -814,7 +818,6 @@ void solveNLCTV(
 
                     if(phi[i0][j0]<1)
                     {
-
                         subMatrix(p_r,M,N,phi,i0,j0,sphi);
                         if(any(2*p_r+1,2*p_r+1,sphi)==1)
 
@@ -829,23 +832,11 @@ void solveNLCTV(
                             sum_w =sumMatrix(s_s,s_s,subw);
                             u0[i][j][k]=(lamda*PHI[i0][j0]*f0[i][j][k]+sum_yw)/(lamda*PHI[i0][j0]+sum_w);
                         }
-                        else
-                        {
-                            u0[i][j][k]=u0[i][j][k];
-                        }
                     }
                 }
             }
         }
-
-        if (step>9 && step%10==0 && allOne(M,N,phi)==1)
-        {
-            printfFnc("DONE");
-            done = 1;
-        } else {
-            last_count = sumMatrix(M,N,phi);
-            step++;
-        }
+        step++;
     }
     }
 
