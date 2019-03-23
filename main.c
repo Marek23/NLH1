@@ -5,27 +5,27 @@
 
 #define printfFnc(...) { mexPrintf(__VA_ARGS__); mexEvalString("drawnow;");}
 
-float **sphi,  **W1,  **W2,  **diff,  **ret,  **kernel;  // p_s x p_s
-float **sphik, **W1k, **W2k, **diffk, **retk, **kernelk; // P_S x P_S
+double **sphi,  **W1,  **W2,  **diff,  **ret,  **kernel;  // p_s x p_s
+double **sphik, **W1k, **W2k, **diffk, **retk, **kernelk; // P_S x P_S
 
-float **subw, **subu, **prod;                 // s_s x s_s
+double **subw, **subu, **prod;                 // s_s x s_s
 
-float **phi2, **phi, **PHI;                   // M x N
+double **phi2, **phi, **PHI;                   // M x N
 
-float ***u;                                   // M x N x c
+double ***u;                                   // M x N x c
 
-float ***u0, ***f0;                           // m x n x c
+double ***u0, ***f0;                           // m x n x c
 
-float *****w;                                 // s_s x s_s x m x n
+double *****w;                                 // s_s x s_s x m x n
 
 void initVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
     int iii, jjj, si, sj;
-    sphi   = calloc(p_s, sizeof(float *));
-    W1     = calloc(p_s, sizeof(float *));
-    W2     = calloc(p_s, sizeof(float *));
-    diff   = calloc(p_s, sizeof(float *));
-    ret    = calloc(p_s, sizeof(float *));
-    kernel = calloc(p_s, sizeof(float *));
+    sphi   = calloc(p_s, sizeof(double *));
+    W1     = calloc(p_s, sizeof(double *));
+    W2     = calloc(p_s, sizeof(double *));
+    diff   = calloc(p_s, sizeof(double *));
+    ret    = calloc(p_s, sizeof(double *));
+    kernel = calloc(p_s, sizeof(double *));
     for(iii = 0; iii < p_s; iii++) {
         sphi[iii]   = calloc(p_s, sizeof(float));
         W1[iii]     = calloc(p_s, sizeof(float));
@@ -35,12 +35,12 @@ void initVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
         kernel[iii] = calloc(p_s, sizeof(float));
     }
 
-    sphik   = calloc(P_S, sizeof(float *));
-    W1k     = calloc(P_S, sizeof(float *));
-    W2k     = calloc(P_S, sizeof(float *));
-    diffk   = calloc(P_S, sizeof(float *));
-    retk    = calloc(P_S, sizeof(float *));
-    kernelk = calloc(P_S, sizeof(float *));
+    sphik   = calloc(P_S, sizeof(double *));
+    W1k     = calloc(P_S, sizeof(double *));
+    W2k     = calloc(P_S, sizeof(double *));
+    diffk   = calloc(P_S, sizeof(double *));
+    retk    = calloc(P_S, sizeof(double *));
+    kernelk = calloc(P_S, sizeof(double *));
     for(iii = 0; iii < P_S; iii++) {
         sphik[iii]   = calloc(P_S, sizeof(float));
         W1k[iii]     = calloc(P_S, sizeof(float));
@@ -50,37 +50,37 @@ void initVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
         kernelk[iii] = calloc(P_S, sizeof(float));
     }
 
-    subw = calloc(s_s, sizeof(float *));
-    subu = calloc(s_s, sizeof(float *));
-    prod = calloc(s_s, sizeof(float *));
+    subw = calloc(s_s, sizeof(double *));
+    subu = calloc(s_s, sizeof(double *));
+    prod = calloc(s_s, sizeof(double *));
     for(iii = 0; iii < s_s; iii++) {
         subw[iii] = calloc(s_s, sizeof(float));
         subu[iii] = calloc(s_s, sizeof(float));
         prod[iii] = calloc(s_s, sizeof(float));
     }
 
-    phi2 = calloc(M, sizeof(float *));
-    phi  = calloc(M, sizeof(float *));
-    PHI  = calloc(M, sizeof(float *));
+    phi2 = calloc(M, sizeof(double *));
+    phi  = calloc(M, sizeof(double *));
+    PHI  = calloc(M, sizeof(double *));
     for(iii = 0; iii < M; iii++) {
        phi2[iii] = calloc(N, sizeof(float));
        phi[iii]  = calloc(N, sizeof(float));
        PHI[iii]  = calloc(N, sizeof(float));
     }
 
-    u = calloc(M, sizeof(float **));
+    u = calloc(M, sizeof(double **));
     for(iii = 0; iii < M; iii++) { 
-       u[iii] = calloc(N, sizeof(float *));
+       u[iii] = calloc(N, sizeof(double *));
         for(jjj = 0; jjj < N; jjj++) { 
             u[iii][jjj] = calloc(c, sizeof(float));
         }
     }
 
-    u0 = calloc(m, sizeof(float **));
-    f0 = calloc(m, sizeof(float **));
+    u0 = calloc(m, sizeof(double **));
+    f0 = calloc(m, sizeof(double **));
     for(iii = 0; iii < m; iii++) { 
-       u0[iii] = calloc(n, sizeof(float *));
-       f0[iii] = calloc(n, sizeof(float *));
+       u0[iii] = calloc(n, sizeof(double *));
+       f0[iii] = calloc(n, sizeof(double *));
         for(jjj = 0; jjj < n; jjj++) { 
             u0[iii][jjj] = calloc(c, sizeof(float));
             f0[iii][jjj] = calloc(c, sizeof(float));
@@ -88,25 +88,25 @@ void initVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
     }
 
     printfFnc("Inicjalizacja wagi: ");
-    w = calloc(s_s, sizeof(float ****));
+    w = calloc(s_s, sizeof(double ****));
     if(!w){
         printfFnc("FAILED \n");
         return;
     }
     for(si = 0; si < s_s; si++) { 
-        w[si] = calloc(s_s, sizeof(float ***));
+        w[si] = calloc(s_s, sizeof(double ***));
         if(!w[si]){
             printfFnc("FAILED \n");
             return;
         }
         for(sj = 0; sj < s_s; sj++) {
-            w[si][sj] = calloc(m, sizeof(float **));
+            w[si][sj] = calloc(m, sizeof(double **));
             if(!w[si][sj]){
                 printfFnc("FAILED \n");
                 return;
             }
             for(iii = 0; iii < m; iii++) { 
-                w[si][sj][iii] = calloc(n, sizeof(float *));
+                w[si][sj][iii] = calloc(n, sizeof(double *));
                 if(!w[si][sj][iii]){
                     printfFnc("FAILED \n");
                     return;
@@ -127,7 +127,7 @@ void initVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
 void clearVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
     int iii, jjj, si, sj;
 
-    // float **sphi,  **W1,  **W2,  **diff,  **ret, **kernel;  // p_s x p_s
+    // double **sphi,  **W1,  **W2,  **diff,  **ret, **kernel;  // p_s x p_s
     for(iii = 0; iii < p_s; iii++) {
         free(sphi[iii]);
         free(W1[iii]);
@@ -143,7 +143,7 @@ void clearVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
     free(ret);
     free(kernel);
 
-    // float **sphik, **W1k, **W2k, **diffk, **retk, **kernelk; // P_S x P_S
+    // double **sphik, **W1k, **W2k, **diffk, **retk, **kernelk; // P_S x P_S
     for(iii = 0; iii < P_S; iii++) {
         free(sphik[iii]);
         free(W1k[iii]);
@@ -159,7 +159,7 @@ void clearVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
     free(retk);
     free(kernelk);
 
-    // float **subw, **subu, **prod;                 // s_s x s_s
+    // double **subw, **subu, **prod;                 // s_s x s_s
     for(iii = 0; iii < s_s; iii++) {
         free(subw[iii]);
         free(subu[iii]);
@@ -169,7 +169,7 @@ void clearVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
     free(subu);
     free(prod);
 
-    // float **phi2, **phi, **PHI;                   // M x N
+    // double **phi2, **phi, **PHI;                   // M x N
     for(iii = 0; iii < M; iii++) {
         free(phi2[iii]);
         free(phi[iii]);
@@ -179,7 +179,7 @@ void clearVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
     free(phi);
     free(PHI);
 
-    // float ***u; // M x N x c
+    // double ***u; // M x N x c
     for(iii = 0; iii < M; iii++) {
         for(jjj = 0; jjj < N; jjj++) {
             free(u[iii][jjj]);
@@ -188,7 +188,7 @@ void clearVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
     }
     free(u);
 
-    // float ***u0, ***f0;                           // m x n x c
+    // double ***u0, ***f0;                           // m x n x c
     for(iii = 0; iii < m; iii++) {
         for(jjj = 0; jjj < n; jjj++) {
             free(u0[iii][jjj]);
@@ -200,7 +200,7 @@ void clearVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
     free(u0);
     free(f0);
 
-    // float *****w;                                 // s_s x s_s x m x n
+    // double *****w;                                 // s_s x s_s x m x n
     for(si = 0; si < s_s; si++) {
         for(sj = 0; sj < s_s; sj++) {
             for(iii = 0; iii < m; iii++) {
@@ -220,7 +220,7 @@ void clearVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
 void showMatrix2D(
     int m,
     int n,
-    float **w)
+    double **w)
     {
     int i;
     int j;
@@ -239,7 +239,7 @@ void showMatrix3D(
     int m,
     int n,
     int c,
-    float ***w)
+    double ***w)
     {
     int i;
     int j;
@@ -263,7 +263,7 @@ void showMatrixWeight(
     int m,
     int n,
     int c,
-    float *****w)
+    double *****w)
     {
     int i;
     int j;
@@ -298,8 +298,8 @@ void padarray2d(
     int m,
     int n,
     int t_r,
-    float **in,
-    float **new_in)
+    double **in,
+    double **new_in)
     {
     int new_m = m+(2*t_r);
     int new_n = n+(2*t_r);
@@ -345,8 +345,8 @@ void padarray3d(
     int n,
     int c,
     int t_r,
-    float ***in,
-    float ***new_in)
+    double ***in,
+    double ***new_in)
     {
     int new_m = m+(2*t_r);
     int new_n = n+(2*t_r);
@@ -401,10 +401,10 @@ void subMatrix3D(
     int n,
     int c,
     int k,
-    float ***in,
+    double ***in,
     int i0,
     int j0,
-    float **out)
+    double **out)
     {
     int i ,j;
     for(i=0;i<(2*p_r+1);i++)
@@ -420,10 +420,10 @@ void subMatrix(
     int p_r,
     int m,
     int n,
-    float **in,
+    double **in,
     int i0,
     int j0,
-    float **out)
+    double **out)
     {
     int i ,j;
     for(i=0;i<(2*p_r+1);i++)
@@ -438,9 +438,9 @@ void subMatrix(
 void prodMatrix(
     int m,
     int n,
-    float **in1,
-    float **in2,
-    float **prod)
+    double **in1,
+    double **in2,
+    double **prod)
     {
     int i ,j;
     for(i=0;i<m;i++)
@@ -455,10 +455,10 @@ void prodMatrix(
 void prod3Matrix(
     int m,
     int n,
-    float **in1,
-    float **in2,
-    float **in3,
-    float **prod)
+    double **in1,
+    double **in2,
+    double **in3,
+    double **prod)
     {
     int i ,j;
     for(i=0;i<m;i++)
@@ -473,9 +473,9 @@ void prod3Matrix(
 void subt2Matrix(
     int m,
     int n,
-    float **from,
-    float **q,
-    float **out)
+    double **from,
+    double **q,
+    double **out)
     {
     int i ,j;
     for(i=0;i<m;i++)
@@ -487,13 +487,13 @@ void subt2Matrix(
     }
     }
 
-float sumMatrix(
+double sumMatrix(
     int m,
     int n,
-    float **in)
+    double **in)
     {
     int i ,j;
-    float sum=0;
+    double sum=0;
     for(i=0;i<m;i++)
     {
         for(j=0;j<n;j++)
@@ -504,10 +504,10 @@ float sumMatrix(
     return sum;
     }
 
-float sumsqr(
-    float a,
-    float b,
-    float c)
+double sumsqr(
+    double a,
+    double b,
+    double c)
     {
     return sqrt(a*a + b*b + c*c);
     }
@@ -515,7 +515,7 @@ float sumsqr(
 int any(
     int m,
     int n,
-    float **in)
+    double **in)
     {
     int i ,j;
     for(i=0;i<m;i++)
@@ -534,7 +534,7 @@ int any(
 int allOne(
     int m,
     int n,
-    float **in)
+    double **in)
     {
     int i ,j;
     for(i=0;i<m;i++)
@@ -553,7 +553,7 @@ int allOne(
 int allNonZero(
     int m,
     int n,
-    float **in)
+    double **in)
     {
     int i,j;
     for(i=0;i<m;i++)
@@ -573,8 +573,8 @@ void updatePhi(
     int M,
     int N,
     int c,
-    float ***u,
-    float ** phi)
+    double ***u,
+    double ** phi)
     {
         int i,j;
         for(i=0;i<M;i++)
@@ -597,11 +597,11 @@ void subWeight(
     int n,
     int c,
     int s_s,
-    float *****w,
+    double *****w,
     int iw,
     int jw,
     int kw,
-    float **out)
+    double **out)
     {
         int i,j;
         for(i=0;i<s_s;i++)
@@ -619,20 +619,20 @@ void updateWeight(
     int c,
     int M,
     int N,
-    float ***u,
+    double ***u,
     int h,
     int p_s,
-    float **kernel,
+    double **kernel,
     int P_S,
-    float **kernelk,
+    double **kernelk,
     int t_r,
     int s_r,
     int p_r,
     int k_r,
     int sw,
-    float **phi,
+    double **phi,
     int s_s,
-    float *****w)
+    double *****w)
     {
 
     int i, j, k, r, s, i0, j0, ii, jj, iii;
@@ -701,21 +701,21 @@ void updateWeight2(
     int c,
     int M,
     int N,
-    float ***u,
+    double ***u,
     int h,
     int p_s,
-    float **kernel,
+    double **kernel,
     int P_S,
-    float **kernelk,
+    double **kernelk,
     int t_r,
     int s_r,
     int p_r,
     int k_r,
     int sw,
-    float **phi,
-    float **PHI,
+    double **phi,
+    double **PHI,
     int s_s,
-    float *****w)
+    double *****w)
     {
 
     int i, j, k, r, s, i0, j0, ii, jj, iii, jjj;
@@ -783,31 +783,31 @@ void solveNLCTV(
     int m,
     int n,
     int c,
-    float ***u0,
+    double ***u0,
     int M,
     int N,
     int h,
     int p_s,
-    float **kernel,
+    double **kernel,
     int P_S,
-    float **kernelk,
+    double **kernelk,
     int t_r,
     int s_r,
     int p_r,
     int sw,
-    float **phi,
-    float **PHI,
+    double **phi,
+    double **PHI,
     int s_s,
-    float *****w,
-    float lamda,
-    float ***f0)
+    double *****w,
+    double lamda,
+    double ***f0)
     {
 
     int i,j,k,i0,j0,iii,ii,jj;
 
     int last_count, step, done;
 
-    float x1,x2,x3,m1,m2,m3;
+    double x1,x2,x3,m1,m2,m3;
 
     int k_r=sw*p_r;
 
