@@ -1,12 +1,13 @@
 clc;
 clear;
+close all;
 
 mex main.c;
 
 images = dir('C:\MAREK\MAGISTERKA\Obrazy\imgmask\*.png');
 
 sw  = 1;
-h   = 0.5;
+h   = 1.5;
 s_r = 10;
 p_r = 5;
 
@@ -14,6 +15,10 @@ f0=imread('Wood.png');
 
 %figure; imagesc(f0); colormap(gray); axis off; axis equal;
 f0=double(f0);
+
+figure
+imshow(uint8(f0));
+
 [m,n,c]=size(f0);
 
 p_s = p_r*2+1;
@@ -50,4 +55,7 @@ t = toc;
 u0 = reshape(u0r,[m,n,c]);
 %figure; imagesc(uint8(u0)); colormap(gray); axis off; axis equal;
 
-imwrite(uint8(u0),['test\'  's_r_' num2str(s_r) 'p_r' num2str(p_r) 'h_' num2str(h) 'sw_' num2str(sw) 't_' num2str(t) '.png']);
+%imwrite(uint8(u0),['test\'  's_r_' num2str(s_r) 'p_r' num2str(p_r) 'h_' num2str(h) 'sw_' num2str(sw) 't_' num2str(t) '.png']);
+% imwrite(uint8(u0), 'sth.png');
+figure
+imshow(uint8(u0));

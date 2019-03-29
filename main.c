@@ -10,7 +10,7 @@ double **sphik, **W1k, **W2k, **diffk, **retk, **kernelk; // P_S x P_S
 
 double **subw, **subu, **prod;                 // s_s x s_s
 
-double **phi2, **phi, **PHI;                   // M x N
+double **phi, **PHI, **e1mask;       // M x N
 
 double ***u;                                   // M x N x c
 
@@ -27,12 +27,12 @@ void initVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
     ret    = calloc(p_s, sizeof(double *));
     kernel = calloc(p_s, sizeof(double *));
     for(iii = 0; iii < p_s; iii++) {
-        sphi[iii]   = calloc(p_s, sizeof(float));
-        W1[iii]     = calloc(p_s, sizeof(float));
-        W2[iii]     = calloc(p_s, sizeof(float));
-        diff[iii]   = calloc(p_s, sizeof(float));
-        ret[iii]    = calloc(p_s, sizeof(float));
-        kernel[iii] = calloc(p_s, sizeof(float));
+        sphi[iii]   = calloc(p_s, sizeof(double));
+        W1[iii]     = calloc(p_s, sizeof(double));
+        W2[iii]     = calloc(p_s, sizeof(double));
+        diff[iii]   = calloc(p_s, sizeof(double));
+        ret[iii]    = calloc(p_s, sizeof(double));
+        kernel[iii] = calloc(p_s, sizeof(double));
     }
 
     sphik   = calloc(P_S, sizeof(double *));
@@ -42,37 +42,37 @@ void initVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
     retk    = calloc(P_S, sizeof(double *));
     kernelk = calloc(P_S, sizeof(double *));
     for(iii = 0; iii < P_S; iii++) {
-        sphik[iii]   = calloc(P_S, sizeof(float));
-        W1k[iii]     = calloc(P_S, sizeof(float));
-        W2k[iii]     = calloc(P_S, sizeof(float));
-        diffk[iii]   = calloc(P_S, sizeof(float));
-        retk[iii]    = calloc(P_S, sizeof(float));
-        kernelk[iii] = calloc(P_S, sizeof(float));
+        sphik[iii]   = calloc(P_S, sizeof(double));
+        W1k[iii]     = calloc(P_S, sizeof(double));
+        W2k[iii]     = calloc(P_S, sizeof(double));
+        diffk[iii]   = calloc(P_S, sizeof(double));
+        retk[iii]    = calloc(P_S, sizeof(double));
+        kernelk[iii] = calloc(P_S, sizeof(double));
     }
 
     subw = calloc(s_s, sizeof(double *));
     subu = calloc(s_s, sizeof(double *));
     prod = calloc(s_s, sizeof(double *));
     for(iii = 0; iii < s_s; iii++) {
-        subw[iii] = calloc(s_s, sizeof(float));
-        subu[iii] = calloc(s_s, sizeof(float));
-        prod[iii] = calloc(s_s, sizeof(float));
+        subw[iii] = calloc(s_s, sizeof(double));
+        subu[iii] = calloc(s_s, sizeof(double));
+        prod[iii] = calloc(s_s, sizeof(double));
     }
 
-    phi2 = calloc(M, sizeof(double *));
-    phi  = calloc(M, sizeof(double *));
-    PHI  = calloc(M, sizeof(double *));
+    e1mask = calloc(M, sizeof(double *));
+    phi    = calloc(M, sizeof(double *));
+    PHI    = calloc(M, sizeof(double *));
     for(iii = 0; iii < M; iii++) {
-       phi2[iii] = calloc(N, sizeof(float));
-       phi[iii]  = calloc(N, sizeof(float));
-       PHI[iii]  = calloc(N, sizeof(float));
+       e1mask[iii] = calloc(N, sizeof(double));
+       phi[iii]    = calloc(N, sizeof(double));
+       PHI[iii]    = calloc(N, sizeof(double));
     }
 
     u = calloc(M, sizeof(double **));
     for(iii = 0; iii < M; iii++) { 
        u[iii] = calloc(N, sizeof(double *));
         for(jjj = 0; jjj < N; jjj++) { 
-            u[iii][jjj] = calloc(c, sizeof(float));
+            u[iii][jjj] = calloc(c, sizeof(double));
         }
     }
 
@@ -82,8 +82,8 @@ void initVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
        u0[iii] = calloc(n, sizeof(double *));
        f0[iii] = calloc(n, sizeof(double *));
         for(jjj = 0; jjj < n; jjj++) { 
-            u0[iii][jjj] = calloc(c, sizeof(float));
-            f0[iii][jjj] = calloc(c, sizeof(float));
+            u0[iii][jjj] = calloc(c, sizeof(double));
+            f0[iii][jjj] = calloc(c, sizeof(double));
         }
     }
 
@@ -112,7 +112,7 @@ void initVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
                     return;
                 }
                 for(jjj = 0; jjj < n; jjj++) { 
-                    w[si][sj][iii][jjj] = calloc(c, sizeof(float));
+                    w[si][sj][iii][jjj] = calloc(c, sizeof(double));
                     if(!w[si][sj][iii][jjj]){
                         printfFnc("FAILED \n");
                         return;
@@ -169,13 +169,13 @@ void clearVars(int p_s, int P_S, int s_s, int M, int N, int m, int n, int c) {
     free(subu);
     free(prod);
 
-    // double **phi2, **phi, **PHI;                   // M x N
+    // double **e1mask, **phi, **PHI;                   // M x N
     for(iii = 0; iii < M; iii++) {
-        free(phi2[iii]);
+        free(e1mask[iii]);
         free(phi[iii]);
         free(PHI[iii]);
     }
-    free(phi2);
+    free(e1mask);
     free(phi);
     free(PHI);
 
@@ -531,6 +531,32 @@ int any(
     return 0;
     }
 
+void imdilate(int nx, int ny, double **mask, double **out, int times)
+{
+    int i, j, i0, j0, t, ii, jj, pres;
+    for (t = 0; t < times; t++)
+    {
+        for (i = 1; i < nx-1; i++)
+        {
+            for (j = 1; j < ny-1; j++)
+            {
+                pres      = 0;
+                out[i][j] = mask[i][j];
+                for (ii = (i-1); ii < (i+2); ii++)
+                {
+                    for (jj = (j-1); jj < (j+2); jj++)
+                    {
+                        if (pres == 0 && mask[ii][jj] > 0)
+                            pres = 1;
+                    }
+                }
+                if (pres == 1)
+                    out[i][j] = 1;
+            }
+        }
+    }
+}
+
 int allOne(
     int m,
     int n,
@@ -811,17 +837,11 @@ void solveNLCTV(
 
     int k_r=sw*p_r;
 
-    for(i = 0; i < M; i++) {
-        for(j = 0; j < N; j++) {
-            phi2[i][j]=phi[i][j];
-        }
-    }
-
     last_count = sumMatrix(M,N,phi);
     printfFnc("INPAINTING \n");
     step =  1;
     done = -1;
-    while(step < 99999 && done != 1)
+    while(step < 9999 && done != 1)
     {
         padarray3d(m,n,c,t_r,u0,u);
         if(step==1)
@@ -837,6 +857,8 @@ void solveNLCTV(
                 P_S,kernelk,t_r,s_r,p_r,k_r,sw,phi,PHI,s_s,w);
         }
         
+        imdilate(M,N,phi,e1mask,1);
+
         for(i=0;i<m;i++)
         {
             for(j=0;j<n;j++)
@@ -844,10 +866,7 @@ void solveNLCTV(
                 i0=i+t_r;
                 j0=j+t_r;
 
-                subMatrix(p_r,M,N,phi,i0,j0,sphi);
-
-                if(phi[i0][j0]<1
-                && sumMatrix(p_s,p_s,sphi) > p_r*(p_s-1))
+                if(phi[i0][j0] != e1mask[i0][j0])
                 {
                     int max_ii=0;
                     int max_jj=0;
@@ -864,9 +883,7 @@ void solveNLCTV(
                             x2=w[ii][jj][i][j][1];
                             x3=w[ii][jj][i][j][2];
 
-                            if(i0-s_r+max_ii < M && i0-s_r+max_ii > -1 
-                            && j0-s_r+max_jj < N && j0-s_r+max_jj > -1
-                            && phi[i0-s_r+ii][j0-s_r+jj]>0
+                            if(phi[i0-s_r+ii][j0-s_r+jj] > 0
                             && sumsqr(x1,x2,x3) > sumsqr(m1,m2,m3))
                             {
                                 max_ii=ii;
@@ -877,23 +894,11 @@ void solveNLCTV(
                             }
                         }
                     }
-                    if(i0-s_r+max_ii < M && i0-s_r+max_ii > -1 
-                    && j0-s_r+max_jj < N && j0-s_r+max_jj > -1
-                    && phi[i0-s_r+max_ii][j0-s_r+max_jj]>0)
-                    {
-                        
-                        u0[i][j][0] =u[i0-s_r+max_ii][j0-s_r+max_jj][0];
-                        u0[i][j][1] =u[i0-s_r+max_ii][j0-s_r+max_jj][1];
-                        u0[i][j][2] =u[i0-s_r+max_ii][j0-s_r+max_jj][2];
-                        phi2[i0][j0]=1;
-                    }
+                    u0[i][j][0] = u[i0-s_r+max_ii][j0-s_r+max_jj][0];
+                    u0[i][j][1] = u[i0-s_r+max_ii][j0-s_r+max_jj][1];
+                    u0[i][j][2] = u[i0-s_r+max_ii][j0-s_r+max_jj][2];
+                    phi[i0][j0]=1;
                 }
-            }
-        }
-
-        for(i = 0; i < M; i++) { 
-            for(j = 0; j < N; j++) {
-                phi[i][j]=phi2[i][j];
             }
         }
 
@@ -946,8 +951,8 @@ void mexFunction(int numOut, mxArray *pmxOut[],
             in2d=0;
             while(in2d<m*n)
             {
-                u0[in2d%m][in2d/m][c_it] = (float)u0u[it];
-                f0[in2d%m][in2d/m][c_it] = (float)f0u[it++];
+                u0[in2d%m][in2d/m][c_it] = (double)u0u[it];
+                f0[in2d%m][in2d/m][c_it] = (double)f0u[it++];
                 in2d++;
             }
         }
@@ -968,18 +973,18 @@ void mexFunction(int numOut, mxArray *pmxOut[],
 
     for(i=0;i<p_s*p_s;i++)
     {
-        kernel[i%p_s][i/p_s] = (float)kernelu[i];
+        kernel[i%p_s][i/p_s] = (double)kernelu[i];
     }
 
     for(i=0;i<P_S*P_S;i++)
     {
-        kernelk[i%P_S][i/P_S] = (float)kernelku[i];
+        kernelk[i%P_S][i/P_S] = (double)kernelku[i];
     }
 
     for(i=0;i<M*N;i++)
     {
-        phi[i%M][i/M] = (float)phiu[i];
-        PHI[i%M][i/M] = (float)PHIu[i];
+        phi[i%M][i/M] = (double)phiu[i];
+        PHI[i%M][i/M] = (double)PHIu[i];
     }
 
     solveNLCTV(m,n,c,u0,M,N,h,p_s,kernel,P_S,kernelk,t_r,
